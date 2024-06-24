@@ -354,11 +354,12 @@ class bsdinteraction():
         return message    
     
     
-    def existe_rut(self):
+    def existe_rut(self,rut):
+        print(rut)
         self.__database="correosyury.db"
         conn = sqlite3.connect(self.__database)
         cursor = conn.cursor()
-        cursor.execute("SELECT rut FROM trabajadores")
+        cursor.execute("SELECT rut FROM trabajadores WHERE rut = ?", (rut,))
         rut = cursor.fetchall()
         conn.close()
         

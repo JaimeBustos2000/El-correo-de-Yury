@@ -24,12 +24,12 @@ class LoginPage:
     def build_login_page(self):
         self.text_user = TextField(
             border_radius=20, label="Usuario", label_style=TextStyle(color="#ffffff"),
-            border_color="#198357", text_size=20, value=""
+            border_color="#198357", text_size=20, value="",color="WHITE"
         )
         
         self.text_pass = TextField(
             border_radius=20, label="Contraseña", label_style=TextStyle(color="#ffffff"),
-            border_color="#198357", text_size=20, password=True, value=""
+            border_color="#198357", text_size=20, password=True, value="",color="WHITE",can_reveal_password=True
         )
 
         self.ingresobtn = ElevatedButton(
@@ -171,7 +171,7 @@ class DashboardPage:
         self.datos = ElevatedButton(text="Cuenta", on_click=self.dataemp)
 
         self.navbar = AppBar(
-            leading=IconButton(icons.DOOR_BACK_DOOR_OUTLINED, opacity=80, on_click=self.disconnectt),
+            leading=IconButton(icons.DOOR_BACK_DOOR_OUTLINED, on_click=self.disconnectt),
             center_title=False,
             bgcolor="#000000",
             actions=[self.start, self.listaEmp, self.forms, self.datos]
@@ -232,10 +232,10 @@ class ProfilePage:
         return datetime.now().strftime("%d-%m-%Y")
 
     def build_profile_page(self):
-        self.nombre = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Nombre")
-        self.apellido = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Apellido")
-        self.rut = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Rut")
-        self.genero = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Genero")
+        self.nombre = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Nombre",label_style=TextStyle(color="WHITE"))
+        self.apellido = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Apellido",label_style=TextStyle(color="WHITE"))
+        self.rut = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Rut",label_style=TextStyle(color="WHITE"))
+        self.genero = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Genero",label_style=TextStyle(color="WHITE"))
 
         self.select_genero = Dropdown(value = self.genero.value,options=[
             dropdown.Option("F"),
@@ -243,11 +243,11 @@ class ProfilePage:
         ],
             visible=False)
 
-        self.direccion = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Direccion")
-        self.telefono = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Telefono")
-        self.cargo = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Cargo")
-        self.fecha = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Fecha de ingreso")
-        self.area = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Departamento")
+        self.direccion = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Direccion",label_style=TextStyle(color="WHITE"))
+        self.telefono = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Telefono",label_style=TextStyle(color="WHITE"))
+        self.cargo = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Cargo",label_style=TextStyle(color="WHITE"))
+        self.fecha = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Fecha de ingreso",label_style=TextStyle(color="WHITE"))
+        self.area = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Departamento",label_style=TextStyle(color="WHITE"))
 
         self.contactos_emergencia = []
         self.cargas_familiares = []
@@ -284,12 +284,12 @@ class ProfilePage:
         # Cargas familiares
         self.carga_rut = TextField(value="", color="WHITE", height=40, bgcolor="BLACK", label="Rut")
         self.carga_nombre = TextField(value="", color="WHITE", height=40, bgcolor="BLACK", label="Nombre")
-        self.genero_carga = Dropdown(label="Genero", label_style=TextStyle(color="BLACK"), width=200, color="WHITE", options=[
+        self.genero_carga = Dropdown(label="Genero", label_style=TextStyle(color="BLACK"), width=200, color="BLACK", options=[
             dropdown.Option("F"),
             dropdown.Option("M")
         ])
 
-        self.parentesco_carga = Dropdown(label="Relacion", label_style=TextStyle(color="BLACK"), width=200, color="WHITE", options=[
+        self.parentesco_carga = Dropdown(label="Relacion", label_style=TextStyle(color="BLACK"), width=200, color="BLACK", options=[
             dropdown.Option("1", text="Padre"),
             dropdown.Option("2", text="Madre"),
             dropdown.Option("3", text="Hijo/a"),
@@ -374,7 +374,7 @@ class ProfilePage:
         self.contactos_emergencia_container.controls.clear()
         for row in rows:
             contacto = Row(controls=[
-                TextField(value=row[1], color="BLACK", height=40, read_only=True, bgcolor="WHITE", label="Nombre"),
+                TextField(value=row[1], color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Nombre",label_style=TextStyle(color="WHITE")),
                 Dropdown(disabled=True,width=200, color="WHITE", value=row[2], options=[
                     dropdown.Option("1", text="Padre"),
                     dropdown.Option("2", text="Madre"),
@@ -383,7 +383,7 @@ class ProfilePage:
                     dropdown.Option("5", text="Primo/a"),
                     dropdown.Option("6", text="Conyuge")
                 ]),
-                TextField(value=row[3], color="BLACK", height=40, read_only=True, bgcolor="WHITE", label="Teléfono")
+                TextField(value=row[3], color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Teléfono",label_style=TextStyle(color="WHITE"))
             ])
             self.contactos_emergencia_container.controls.append(contacto)
         self.page.update()
@@ -398,13 +398,13 @@ class ProfilePage:
         self.cargas_familiares_container.controls.clear()
         for row in rows:
             carga = Row(controls=[
-                TextField(value=row[1], color="BLACK", height=40, read_only=True, bgcolor="WHITE", label="Rut"),
-                TextField(value=row[2], color="BLACK", height=40, read_only=True, bgcolor="WHITE", label="Nombre"),
-                Dropdown(disabled=True,width=200, color="WHITE", value=row[3], options=[
+                TextField(value=row[1], color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Rut",label_style=TextStyle(color="WHITE")),
+                TextField(value=row[2], color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Nombre",label_style=TextStyle(color="WHITE")),
+                Dropdown(disabled=True,width=200, color="BLACK", value=row[3], options=[
                     dropdown.Option("F"),
                     dropdown.Option("M")
                 ]),
-                Dropdown(disabled=True,width=200, color="WHITE", value=row[4], options=[
+                Dropdown(disabled=True,width=200, color="BLACK", value=row[4], options=[
                     dropdown.Option("1", text="Padre"),
                     dropdown.Option("2", text="Madre"),
                     dropdown.Option("3", text="Hijo/a"),
@@ -444,8 +444,8 @@ class ProfilePage:
         self.page.update()
 
     def agregar_contacto_emergencia(self, e):
-        nombre_contacto = TextField(value="", color="BLACK", height=40, bgcolor="WHITE", label="Nombre", label_style=TextStyle(color="BLACK"))
-        relacion_contacto = Dropdown(width=200, color="WHITE", label="Relación", label_style=TextStyle(color="BLACK"), options=[
+        nombre_contacto = TextField(value="", color="WHITE", height=40, bgcolor="BLACK", label="Nombre", label_style=TextStyle(color="WHITE"))
+        relacion_contacto = Dropdown(width=200, color="BLACK", label="Relación", label_style=TextStyle(color="WHITE"), options=[
             dropdown.Option("1",text="Padre"),
             dropdown.Option("2",text="Madre"),
             dropdown.Option("3",text="Hijo/a"),
@@ -453,7 +453,7 @@ class ProfilePage:
             dropdown.Option("5",text="Primo/a"),
             dropdown.Option("6",text="Conyuge")
         ])
-        telefono_contacto = TextField(value="", color="BLACK", height=40, bgcolor="WHITE", label="Teléfono", label_style=TextStyle(color="BLACK"))
+        telefono_contacto = TextField(value="", color="WHITE", height=40, bgcolor="BLACK", label="Teléfono", label_style=TextStyle(color="WHITE"))
 
         nuevo_contacto = Row(controls=[nombre_contacto, relacion_contacto, telefono_contacto])
 
@@ -1071,7 +1071,7 @@ class FormPage:
 
         # Si pasa todas las validaciones
         self.bsd=bsdinteraction()
-        exist_dni=self.bsd.existe_rut()
+        exist_dni=self.bsd.existe_rut(formulario["DataEmpleado"]["rut"])
         if exist_dni:
             return True, "Rut ya existe en la base de datos."
         else:
@@ -1095,6 +1095,7 @@ class FormPage:
             self.page.dialog = alt
             alt.open = True
             self.page.update()
+            time.sleep(3)
             print("Correcto")
             self.clean_start(self.page)
             
