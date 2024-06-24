@@ -1,0 +1,23 @@
+{
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.autoImportCompletions": false,
+    "sqltools.connections": [
+        {
+            "oracleOptions": {
+                "privilege": "SYSDBA",
+                "thickMode": false,
+                "autoCommit": true,
+                "lowerCase": false,
+                "limitPrefetchRows": false
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 1521,
+            "driver": "Oracle",
+            "name": "cdyury",
+            "connectString": "oracle+cx_oracle://cdyurymda:53492840Aa@host:1521/?service_name=cdyury",
+            "username": "cdyurymda",
+            "password": "53492840Aa!"
+        }
+    ]
+}

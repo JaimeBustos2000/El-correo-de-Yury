@@ -1,0 +1,16 @@
+page.go()   -> Define a que pagina se redirigira
+elevatedButon -> Es un boton con borde y un texto, personalizable
+on_click()  -> Funcion interna que realiza acciones cuando el boton se presiona
+textfield -> Define un campo para añadir texto, personalizable con otros metodos
+Contaier -> Contenedor grande que puede definirse sobre una Card
+Card  -> Representa un recuadro en pantalla si no se define el tamaño ocupa toda la pantalla
+"controls" "content" -> Puede contener multiples otros metodos y generalmente se usa para añadir botones o interfaces dentro de otras
+row -> Crea una fila que ocupa todo el ancho que permite añadir otros elementos que puede heredar controls
+colum -> Crea una columna que ocupa todo el espacio posible hacia abajo, al igual puede heredar controles
+vertical-horizontal aligment -> permite mantener direcciones de alineacion, en el centro, principio, final
+dropdown  -> interfaz de seleccion multiple predefinidas
+dropdown.option -> Seleccion de opciones
+divider -> Espacio añadido entre cada elemento definido por height
+text -> Añade un solo texto plano definido
+appbar -> Barra de navegacion superior en la pantalla
+leading-appbar -> Define lo que se presenta la izquierda de barra de navegacion
