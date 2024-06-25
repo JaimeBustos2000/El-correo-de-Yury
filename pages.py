@@ -69,7 +69,7 @@ class LoginPage:
         user = self.get_username()
         password = self.get_password()
         conexion = bsdinteraction()
-        conexion.conexion()
+        conexion.duplicate()
         validacion = conexion.login(user, password)
         if validacion:
             self.state.set_username(user)
@@ -136,6 +136,8 @@ class RegisterPage:
             )
         )
     
+    # Funcion que verifica si el rut ingresado es correcto y si no existe en la base de datos,
+    # si es correcto y no existe, se procede a crear el usuario
     def new_user(self, e):
         rut = self.rut_user.value
         conexion = bsdinteraction()
@@ -184,31 +186,33 @@ class DashboardPage:
 
         self.build_dashboard_page()
 
+    # Funcion que construye la pagina de inicio con marcadores de las otras paginas
     def build_dashboard_page(self):
         # Customize the initial state of the buttons as needed
         self.listaEmp.bgcolor, self.listaEmp.color = "", ""
         self.forms.bgcolor, self.forms.color = "", ""
         self.datos.color, self.datos.bgcolor = "", ""
         self.start.color, self.start.bgcolor = "BLACK", "GREEN"
-
+    # Funcion que construye la pagina de inicio con marcadores de las otras paginas
     def build_account_page(self):
         self.listaEmp.bgcolor, self.listaEmp.color = "", ""
         self.forms.bgcolor, self.forms.color = "", ""
         self.datos.color, self.datos.bgcolor = "BLACK", "GREEN"
         self.start.color, self.start.bgcolor = "", ""
-        
+    # Funcion que construye la pagina de inicio con marcadores de las otras paginas        
     def build_lista_emp(self):
         self.listaEmp.bgcolor, self.listaEmp.color = "GREEN", "BLACK"
         self.forms.bgcolor, self.forms.color = "", ""
         self.datos.color, self.datos.bgcolor = "", ""
         self.start.color, self.start.bgcolor = "", ""
-       
+    # Funcion que construye la pagina de inicio con marcadores de las otras paginas       
     def build_forms(self):
         self.listaEmp.bgcolor, self.listaEmp.color = "", ""
         self.forms.bgcolor, self.forms.color = "GREEN", "BLACK"
         self.datos.color, self.datos.bgcolor = "", ""
         self.start.color, self.start.bgcolor = "", ""   
-       
+    
+    # funcion que obtiene datos del empleado       
     def dataemp(self,e):
         current_user = bsdinteraction()
         username=self.app_state.get_username()
@@ -216,7 +220,7 @@ class DashboardPage:
         self.app_state.set_data(data)
         self.page.go("/cuenta")
         
-              
+    # funcion que desconecta al usuario             
     def disconnectt(self, e):
         self.page.go("/")
 
@@ -362,7 +366,7 @@ class ProfilePage:
                 content=user_info_container
             )
         )
-
+    # Funcion que carga los contactos que tiene el trabajador
     def load_contactos_emergencia(self):
         conn = sqlite3.connect("correosyury.db")
         cur = conn.cursor()
@@ -388,6 +392,7 @@ class ProfilePage:
             self.contactos_emergencia_container.controls.append(contacto)
         self.page.update()
 
+    # Funcion que carga las cargas familiares que tiene el trabajador
     def load_cargas_familiares(self):
         conn = sqlite3.connect("correosyury.db")
         cur = conn.cursor()
@@ -416,17 +421,19 @@ class ProfilePage:
             self.cargas_familiares_container.controls.append(carga)
         self.page.update()
 
-
+    # Funcion que eliminar un contacto de emergencia
     def mostrar_eliminar_contacto_dialog(self, e):
         self.page.dialog = self.eliminar_contacto_dialog
         self.eliminar_contacto_dialog.open = True
         self.page.update()
 
+    # Funcion que elimina una carga familiar
     def mostrar_eliminar_carga_dialog(self, e):
         self.page.dialog = self.eliminar_carga_dialog
         self.eliminar_carga_dialog.open = True
         self.page.update()
-
+    
+    # Funcion que confirma la eliminacion de un contacto de emergencia
     def confirmar_eliminar_contacto_emergencia(self, e):
         nombre_contacto = self.eliminar_contacto_dialog.content.controls[0].value
         trabajador_rut = self.rut.value
@@ -435,6 +442,7 @@ class ProfilePage:
         self.eliminar_contacto_dialog.open = False
         self.page.update()
 
+    # Funcion que confirma la eliminacion de una carga familiar
     def confirmar_eliminar_carga_familiar(self, e):
         nombre_carga = self.eliminar_carga_dialog.content.controls[0].value
         trabajador_rut = self.rut.value
@@ -443,6 +451,7 @@ class ProfilePage:
         self.eliminar_carga_dialog.open = False
         self.page.update()
 
+    # Añade una interfaz para agregar contactos de emergencia
     def agregar_contacto_emergencia(self, e):
         nombre_contacto = TextField(value="", color="WHITE", height=40, bgcolor="BLACK", label="Nombre", label_style=TextStyle(color="WHITE"))
         relacion_contacto = Dropdown(width=200, color="BLACK", label="Relación", label_style=TextStyle(color="WHITE"), options=[
@@ -466,6 +475,7 @@ class ProfilePage:
             'telefono': telefono_contacto
         })
 
+    # Elimina el contacto de emergencia de la pantalla actual
     def eliminar_contacto_emergencia(self, e):
         if self.contactos_emergencia:
             contacto = self.contactos_emergencia.pop()
@@ -475,14 +485,15 @@ class ProfilePage:
             self.contactos_emergencia_container.controls.pop()
         self.page.update()
         
-        
+    # Elimina la carga familiar de la pantalla actual por nombre
     def eliminar_carga_por_nombre(self, nombre, trabajador_rut):
         conn = sqlite3.connect("correosyury.db")
         cur = conn.cursor()
         cur.execute("DELETE FROM CargaEmp WHERE nombre=? AND trabajador_rut=?", (nombre, trabajador_rut))
         conn.commit()
         conn.close()
-        
+
+    #   Elimina el contacto de emergencia de la pantalla actual por nombre
     def eliminar_contacto_por_nombre(self, nombre, trabajador_rut):
         conn = sqlite3.connect("correosyury.db")
         cur = conn.cursor()
@@ -490,6 +501,7 @@ class ProfilePage:
         conn.commit()
         conn.close()
 
+    # Añade la interfaz de carga familiar a la pantalla
     def agregar_carga_familiar(self, e):
         rut_carga = TextField(value="", color="BLACK", height=40, bgcolor="WHITE", label="Rut", label_style=TextStyle(color="BLACK"))
         nombre_carga = TextField(value="", color="BLACK", height=40, bgcolor="WHITE", label="Nombre", label_style=TextStyle(color="BLACK"))
@@ -518,6 +530,7 @@ class ProfilePage:
             'parentesco': parentesco_carga
         })
 
+    # Funcion que eliminar una carga familiar de la pantalla
     def eliminar_carga_familiar(self, e):
         if self.cargas_familiares:
             carga = self.cargas_familiares.pop()
@@ -527,6 +540,7 @@ class ProfilePage:
             self.cargas_familiares_container.controls.pop()
         self.page.update()
 
+    # funcion que obtiene los datos editables, para luego ser guardados
     def obtener_contactos_emergencia(self):
         contactos_data = []
         for contacto in self.contactos_emergencia:
@@ -537,6 +551,7 @@ class ProfilePage:
             })
         return contactos_data
 
+    # funcion que obtiene las cargas familiares, para luego ser guardadas
     def obtener_cargas_familiares(self):
         cargas_data = []
         for carga in self.cargas_familiares:
@@ -548,6 +563,7 @@ class ProfilePage:
             })
         return cargas_data
 
+    # funcion que obtiene los datos editables del trabajador
     def obtener_datos_editables(self, e):
         self.nombre.on_change = self.obtener_datos_editables
         self.select_genero.on_change = self.obtener_datos_editables
@@ -563,6 +579,7 @@ class ProfilePage:
 
         return datap
 
+    # funcion que guarda los datos editables del trabajador y comprueba si hay cambios y demas
     def save_data(self, e):
         if not self.hay_cambios():
             self.show_error_dialog("No se han realizado cambios.")
@@ -702,6 +719,9 @@ class ProfilePage:
         self.telefono.read_only = True
         return self.cuenta
 
+
+
+# CLASE QUE CONTROLA EL FORMULARIO DE INGRESO DE DATOS
 class FormPage:
     def __init__(self,page:Page,app_state):
         self.page=page
@@ -730,6 +750,7 @@ class FormPage:
         fecha_actual=datetime.now()
         fecha_actual=fecha_actual.strftime("%d-%m-%Y")
         self.fecha=TextField(value=f"{fecha_actual}",color="BLACK",width=200, hint_text="Fecha de ingreso",text_size=15,text_align="CENTER")
+        
         self.areaDepto=Dropdown(width=200,options=[
             dropdown.Option("envios"),
             dropdown.Option("recursos humanos"),
@@ -795,7 +816,7 @@ class FormPage:
             dropdown.Option("Conyuge")
             ])
         
-    
+        # FORMULARIO DATOS PERSONALES
         dataP=Container(
                 width=1366,
                 height=150,
@@ -824,7 +845,7 @@ class FormPage:
                     ]
                 )
             )        
-
+        # FORMULARIO DATOS LABORALES
         dataL=Container(
                 width=1366,
                 height=100,
@@ -844,7 +865,7 @@ class FormPage:
                     ]
                 )
             )
-        
+        # FORMULARIO CONTACTOS DE EMERGENCIA
         dataC=Container(
             width=1366,
             height=120,
@@ -872,7 +893,7 @@ class FormPage:
                 ]
             )
         )
-        
+        # FORMULARIO CARGAS FAMILIARES
         dataF=Container(
             width=1366,
             height=120,
@@ -905,6 +926,7 @@ class FormPage:
             )
         )        
         
+        # FORMULARIO COMPLETO
         self.form_state=Column(
             spacing=5,
             horizontal_alignment=CrossAxisAlignment.CENTER,
@@ -930,7 +952,7 @@ class FormPage:
                 Divider(height=5,color="transparent"),
                 Text(value="CARGAS FAMILIARES",color="BLACK",size=20),
                 dataF])
-                
+        # CARTA QUE CONTIENE EL FORMULARIO
         self.formulario=Card(
             width=1366,
             height=800,
@@ -940,10 +962,11 @@ class FormPage:
                 border_radius=5,
                 bgcolor="#B2DFF5",
                 content=self.form_state))
-        
+    # RETORNA LA INTERFAZ COMPLETA
     def get_card(self):
         return self.formulario
 
+    # CREA UN DICCIONARIO DE DATOS DE LOS FORMULARIOS
     def get_data(self):
         formulario = {
             "DataEmpleado": {
@@ -986,7 +1009,7 @@ class FormPage:
         }
         return formulario
         
-        
+    # VALIDA QUE LOS CAMPOS NO ESTEN VACIOS Y QUE EL RUT SEA VALIDO CON EL BOTON
     def dni_comp(self,e):
         self.__bsd=bsdinteraction()
         rut=self.rut.value
@@ -996,40 +1019,46 @@ class FormPage:
         print(dni_exist)
         
         if 11>len(rut)<9 or rut=="":            
-            alt = AlertDialog(title=Text("Ingrese un rut valido"))  # Cambiar `message` por `Text(message)`
+            alt = AlertDialog(title=Text("Ingrese un rut valido"))  # MENSAJE DE ALERTA
             self.page.dialog = alt
             alt.open = True
             self.page.update()
         else:
             if dni_exist:
-                alt = AlertDialog(title=Text("Rut ya existe"))  # Cambiar `message` por `Text(message)`
+                alt = AlertDialog(title=Text("Rut ya existe"))  
                 self.page.dialog = alt
                 alt.open = True
                 self.page.update()
             else:
-                alt = AlertDialog(title=Text("Rut disponible"))  # Cambiar `message` por `Text(message)`
+                alt = AlertDialog(title=Text("Rut disponible"))  
                 self.page.dialog = alt
                 alt.open = True
                 self.page.update()
-        
+    
+    # VALIDA QUE LOS CAMPOS NO ESTEN VACIOS Y QUE EL RUT SEA VALIDO AL INGRESAR COMO DATO NUEVO
     def campo_vacio(self):
         def validar_rut(rut):
             return 8 < len(rut) < 11 and not rut.endswith("-")
 
+        # Validar que un campo no esté vacío
         def validar_campo(campo, clave=None):
             # Validar sexo/género para que solo sea "F" o "M"
             if clave in ["sexo", "genero"]:
                 return campo in ["F", "M"]
             return len(campo) >= 3
 
+        # Validar que todos los campos de un diccionario estén vacíos
         def todos_vacios(d):
             return all(not v for v in d.values())
 
+        # Validar que al menos un campo de un diccionario esté lleno
         def validar_parcial(d):
             return any(d.values()) and not all(d.values())
 
+        # Obtener los datos del formulario
         formulario = self.get_data()
 
+        # Llamada a las funciones de validación
         for key, section in formulario.items():
             if isinstance(section, dict):
                 for subkey, value in section.items():
@@ -1070,6 +1099,7 @@ class FormPage:
                                 return True, f"Error: el campo {subkey} en {section_key} {idx + 1} debe tener al menos 5 caracteres o ser F/M para género."
 
         # Si pasa todas las validaciones
+        # Crear una instancia de `bsdinteraction` y verificar si el RUT ya existe
         self.bsd=bsdinteraction()
         exist_dni=self.bsd.existe_rut(formulario["DataEmpleado"]["rut"])
         if exist_dni:
@@ -1080,8 +1110,8 @@ class FormPage:
             return False, "Formulario válido."
 
 
-    # Modificación en `validation_pass_form` para manejar el nuevo retorno de `campo_vacio`
-    def validation_pass_form(self,e):  # Asegúrate de pasar `e` como argumento en el handler
+    # VALIDA QUE LOS CAMPOS NO ESTEN VACIOS Y QUE EL RUT SEA VALIDO AL INGRESAR COMO DATO NUEVO
+    def validation_pass_form(self,e):  
         is_invalid, message = self.campo_vacio()
 
         if is_invalid:
@@ -1098,7 +1128,8 @@ class FormPage:
             time.sleep(3)
             print("Correcto")
             self.clean_start(self.page)
-            
+    
+    # LIMPIA LOS CAMPOS DEL FORMULARIO y redirige a la pagina de inicio
     def clean_start(self,page):
         self.build_forms()
         page.go("/inicio")

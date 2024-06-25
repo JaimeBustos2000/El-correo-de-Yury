@@ -12,57 +12,7 @@ class bsdinteraction():
         self.name:str
         self.role:str #Despues a añadir el rol
         self.__database="correosyury.db" #definir la base de datos a usar
-
-    #Permite obtener la conexion a la base de datos
-    def conexion(self):
-        self.__database="correosyury.db"
-        try:
-            # Conectar a la base de datos principal de prueba
-            
-            conn = sqlite3.connect(self.__database)   
-            cursor = conn.cursor()
-            query = """
-            CREATE TABLE IF NOT EXISTS trabajadores (
-            rut TEXT NOT NULL PRIMARY KEY,
-            nombre TEXT NOT NULL,
-            sexo TEXT NOT NULL,
-            direccion TEXT NOT NULL,
-            telefono TEXT,
-            cargo TEXT NOT NULL,
-            fecha_ingreso TEXT NOT NULL,
-            area_y_departamento TEXT NOT NULL
-            );"""
-            cursor.execute(query)
-            
-            # Insertar datos de prueba
-            trabajadores = [
-    ('87654321-0', 'Francisco Lara', 'M', 'Calle Sol', '87654321', 'Gerente de Ventas', '2020-03-15', 'Ventas'),
-    ('13579246-8', 'Gabriela Ruiz', 'F', 'Avenida Central', '13579246', 'Analista Financiera', '2019-07-01', 'Finanzas'),
-    ('11235813-2', 'Roberto Gómez', 'M', 'Paseo de la Reforma', '11235813', 'Ingeniero de Software', '2021-09-10', 'Desarrollo'),
-    ('99887755-4', 'Marta Sanchez', 'F', 'Calle Norte', '99887755', 'Directora de Marketing', '2018-11-25', 'Marketing'),
-    ('55667788-6', 'Diego Marquez', 'M', 'Calle 10', '55667788', 'Jefe de Logística', '2021-04-15', 'Logística'),
-    ('33445566-8', 'Lucia Alvarez', 'F', 'Calle Oriente', '33445566', 'Asistente Ejecutiva', '2022-06-30', 'Dirección'),
-    ('77889900-1', 'Antonio Garcia', 'M', 'Calle Sur', '77889900', 'Consultor TI', '2017-10-05', 'Consultoria'),
-    ('66554433-7', 'Isabel Mendoza', 'F', 'Av. Insurgentes', '66554433', 'Repartidor', '2016-08-20', 'Envios'),
-    ('22334455-1', 'Carlos Ortiz', 'M', 'Calle Primavera', '22334455', 'Jefe de envios', '2023-02-14', 'Envios'),
-    ('44332211-5', 'Elena Morales', 'F', 'Calle Invierno', '44332211', 'Gerente de RRHH', '2015-05-05', 'Recursos Humanos')
-]
-            #Iterar los datos de la lista para añadirlos a la base de datos
-            
-            for trabajador in trabajadores:
-                cursor.execute("INSERT OR IGNORE INTO trabajadores VALUES (?,?,?,?,?,?,?,?)", trabajador)
-            
-            #Llamamos al metodo duplicate que duplica los datos de la base de datos para actualizar los empleados
-            #en la otra base de datos que contiene a los usuarios y contraseñas
-            
-            self.duplicate()
-            
-            conn.commit()
-            conn.close()
-        except sqlite3.Error as e:
-            print(e)
     
-         
     #Verificacion de si el usuario es valido para crear una cuenta en el sistema
     def check_user(self, rut):
 
@@ -168,7 +118,7 @@ class bsdinteraction():
         conexion_origen.close()
         conexion_destino.close()
         
-    #Obtiene todos los datos del usuario para el perfil
+    #Obtiene todos los datos del usuario para el perfil y creacion de usuarios
     def fetch_data(self,name):
         self.__database="cdyusr.db"
         self.__databaseprin="correosyury.db"
@@ -206,7 +156,7 @@ class bsdinteraction():
         conn = sqlite3.connect(self.__database)
         cursor = conn.cursor()
 
-        # Crear las tablas si no existen
+        # Crear las tablas si no existen /// OMITIR DADO QUE ESTAN CREADAS SOLO CONSULTAS
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS Departamento (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -295,10 +245,15 @@ class bsdinteraction():
         # Commit the inserts for departamentos, cargos, and parentescos
         conn.commit()
         
-        # Concatenar nombres y apellidos
+        # Concatenar nombres y apellidos // OMITIR DADO QUE DEBEN ESTAR SEPARADO EL NOMBRE DEL APELLIDO
         data_empleado = array["DataEmpleado"]
         nombre_completo = f"{data_empleado['nombres']} {data_empleado['apellidos']}"
         
+        
+        # Insertar datos en las tablas Trabajadores, ContactosEmp y CargaEmp // SEGUN ORACLE
+        """
+        
+        """
         try:
             # Insertar datos en la tabla Trabajadores
             cursor.execute('''

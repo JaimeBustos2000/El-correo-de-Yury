@@ -2,6 +2,9 @@ import flet as ft
 from flet import *
 import sqlite3
 
+
+# CLASE QUE CREA UNA INTERFAZ DE FILTRO PARA LOS TRABAJADORES
+
 class FilterUI:
     def __init__(self, page: Page):
         self.page = page
@@ -52,6 +55,7 @@ class FilterUI:
 
         return self.ui_container
 
+    # Función que aplica los filtros a la tabla de trabajadores
     def apply_filters(self, e):
         cargo = self.cargo_filter.value
         sexo = self.sexo_filter.value
@@ -73,14 +77,15 @@ class FilterUI:
         self.data_table_container.controls.append(data_table)
         self.page.update()
 
-
+    # Función que reinicia los filtros
     def reset_filters(self,e):
         self.cargo_filter.value=""
         self.sexo_filter.value=""
         self.area_filter.value=""
         self.apply_filters(None)
         self.page.update()
-        
+    
+    # Función que consulta los trabajadores en la base de datos   
     def consultar(self, filtro=""):
         database = "correosyury.db"
 
@@ -109,20 +114,20 @@ class FilterUI:
         conn = sqlite3.connect(database)
         cur = conn.cursor()
 
-        # Execute the query with the filter
+        # EJECUTAR CONSULTAS DE FILTRO
         query = f"SELECT * FROM trabajadores WHERE {filtro}"
         cur.execute(query)
 
         # Fetch the results
         result = cur.fetchall()
 
-        # Get column names
+        # OBTENER NOMBRES DE COLUMNAS
         columns = [column[0] for column in cur.description]
 
-        # Create a dictionary for each row
+        # CREAR DICIONARIOS CON LOS RESULTADOS
         rows = [dict(zip(columns, row)) for row in result]
 
-        # Add rows to the DataTable
+        # AÑADIR FILAS A LA TABLA
         for i, row in enumerate(rows):
             i += 1
             mydt.rows.append(

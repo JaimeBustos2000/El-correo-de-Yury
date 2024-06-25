@@ -2,6 +2,8 @@ from bsdclass import bsdinteraction
 import sqlite3
 from sqlite3 import Error
 
+
+# Clase que guarda el estado de la aplicación y maneja datos obtenidos dentro de la app
 class AppState:
     def __init__(self):
         self.username = ""
@@ -27,10 +29,8 @@ class AppState:
         interact = self.bsd
         interact.data_to_db(form)
 
+    # Función que obtiene los datos de un trabajador en específico y los actualiza
     def update_employee_data(self, rut, genero, nombre, direccion, telefono):
-
-        print(genero)
-            
         try:
             conn = sqlite3.connect("correosyury.db")
             cur = conn.cursor()
@@ -43,6 +43,7 @@ class AppState:
             print(f"Error al actualizar datos del trabajador: {str(e)}")
             return False
 
+    # Función que obtiene las cargas familiares de un trabajador en específico y los añade
     def add_carga_familiar(self, rut, nombre, genero, parentesco, trabajador_rut):
         try:
             conn = sqlite3.connect("correosyury.db")
@@ -55,6 +56,7 @@ class AppState:
         except Exception as e:
             print(f"Error al agregar carga familiar: {str(e)}")
 
+    # Función que obtiene los contactos de emergencia de un trabajador en específico y los añade
     def add_contacto_emergencia(self, nombre, relacion, telefono, trabajador_rut):
         
         try:
@@ -67,6 +69,7 @@ class AppState:
         except Exception as e:
             print(f"Error al agregar contacto de emergencia: {str(e)}")
 
+    # Función que obtiene las cargas familiares y contactos de un trabajador en específico y los carga en listas
     def obtener_cargas_contactos(self, rut_trabajador):
         try:
             conn = sqlite3.connect("correosyury.db")

@@ -1,7 +1,7 @@
 from UserMana import PasswordManager
 import sqlite3
 
-
+# Clase que maneja la base de datos de usuarios
 class UserDatabase:
     def __init__(self):
         self.__db_name = "cdyusr.db"  # Atributo privado

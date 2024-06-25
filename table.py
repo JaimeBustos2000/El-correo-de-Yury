@@ -2,6 +2,7 @@ import flet as ft
 from flet import *
 from filter import FilterUI
 
+# CLASE QUE CREA UNA INTERFAZ DE TABLA PARA LOS TRABAJADORES Y SUS FILTROS
 class Tables:
     def __init__(self, page: Page):
         self.filter_ui = FilterUI(page)

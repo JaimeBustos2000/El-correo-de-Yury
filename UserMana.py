@@ -1,5 +1,6 @@
 import bcrypt
 
+# Clase para manejar contraseñas y hashing seguro
 class PasswordManager:
     def __init__(self):
         self.__salt_rounds = 12  # Atributo privado

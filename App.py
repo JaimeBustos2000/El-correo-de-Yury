@@ -6,6 +6,7 @@ from pages import AppState,LoginPage,RegisterPage,DashboardPage,ProfilePage,Form
 from appstatus import AppState
 
 
+# FUNCION QUE INICIA LA APLICACIÓN
 def main(page: ft.Page):
     page.title = "Correos de Yury"
     page.vertical_alignment = MainAxisAlignment.START
@@ -14,6 +15,7 @@ def main(page: ft.Page):
     app_state=AppState()
     dashboard_page = DashboardPage(page,app_state)
 
+    # Función que maneja el cambio de rutas
     def route_change(e: RouteChangeEvent) -> None:
         page.views.clear()
         if page.route == "/":
@@ -103,6 +105,7 @@ def main(page: ft.Page):
             ) 
         page.update()
 
+    # Función que maneja el evento de retroceder
     def view_pop(e: ViewPopEvent) -> None:
         page.views.pop()
         top_view = page.views[-1]
