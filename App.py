@@ -12,6 +12,8 @@ def main(page: ft.Page):
     page.vertical_alignment = MainAxisAlignment.START
     page.window_maximized = True
 
+    conex=bsdinteraction()
+    conex.connection()
     app_state=AppState()
     dashboard_page = DashboardPage(page,app_state)
 

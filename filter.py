@@ -1,148 +1,106 @@
 import flet as ft
 from flet import *
 import sqlite3
-
+from bsdclass import bsdinteraction
 
 # CLASE QUE CREA UNA INTERFAZ DE FILTRO PARA LOS TRABAJADORES
 
 class FilterUI:
-    def __init__(self, page: Page):
+    def __init__(self, page: ft.Page):
         self.page = page
-        self.data_table_container = Column()  # Inicializamos aquí para evitar el AttributeError
+        self.bsd_interaction = bsdinteraction()
+        self.con = bsdinteraction().connection()
+        self.data_table_container = ft.Column()  # Inicializamos aquí para evitar AttributeError
         self.build_filter_ui()
 
     def build_filter_ui(self):
-        self.cargo_filter = Dropdown(
+        self.cargo_filter = ft.Dropdown(
             label="Cargo",
+            label_style=ft.TextStyle(color="WHITE"),
+            color="BLACK",
             options=[
-                dropdown.Option("1",text="Jefe de envíos"),
-                dropdown.Option("2",text="Gerente de RR.HH."),
-                dropdown.Option("3",text="Personal de RR.HH."),
-                dropdown.Option("4",text="Repartidor")
+                ft.dropdown.Option("1", text="Gerente de RR.HH."),
+                ft.dropdown.Option("2", text="Personal de RR.HH."),
+                ft.dropdown.Option("3", text="Jefe de envíos"),
+                ft.dropdown.Option("4", text="Repartidor")
             ],
             on_change=self.apply_filters
         )
 
-        self.sexo_filter = Dropdown(
+        self.sexo_filter = ft.Dropdown(
             label="Sexo",
+            label_style=ft.TextStyle(color="WHITE"),
+            color="BLACK",
             options=[
-                dropdown.Option("M", text="Masculino"),
-                dropdown.Option("F", text="Femenino")
+                ft.dropdown.Option("M", text="Masculino"),
+                ft.dropdown.Option("F", text="Femenino")
             ],
             on_change=self.apply_filters
         )
 
-        self.area_filter = Dropdown(
+        self.area_filter = ft.Dropdown(
             label="Área",
+            label_style=ft.TextStyle(color="WHITE"),
+            color="BLACK",
             options=[
-                dropdown.Option("1",text="Envios"),
-                dropdown.Option("2",text="recursos humanos")
+                ft.dropdown.Option("1", text="Envios"),
+                ft.dropdown.Option("2", text="recursos humanos")
             ],
             on_change=self.apply_filters
         )
-        
-        self.reset=ft.TextButton(text="Reiniciar",on_click=self.reset_filters,style=ButtonStyle(bgcolor="BLACK",color="WHITE"))
 
-        filters_container = Column(
+        self.reset = ft.TextButton(
+            text="Reiniciar",
+            on_click=self.reset_filters,
+            style=ft.ButtonStyle(bgcolor="BLACK", color="WHITE")
+        )
+
+        filters_container = ft.Column(
             controls=[
-                Row(controls=[self.cargo_filter, self.sexo_filter, self.area_filter,self.reset])
+                ft.Row(controls=[self.cargo_filter, self.sexo_filter, self.area_filter, self.reset])
             ]
         )
 
         self.apply_filters(None)
 
-        self.ui_container = Column(controls=[filters_container, self.data_table_container], expand=True,scroll=True)
+        self.ui_container = ft.Column(
+            controls=[Row(width=100),filters_container, self.data_table_container],
+            expand=True,
+            scroll=True
+        )
 
         return self.ui_container
 
-    # Función que aplica los filtros a la tabla de trabajadores
     def apply_filters(self, e):
         cargo = self.cargo_filter.value
         sexo = self.sexo_filter.value
         area = self.area_filter.value
 
+        print(cargo, sexo, area)
         filtros = []
         if cargo:
-            filtros.append(f"cargo='{cargo}'")
+            filtros.append(f"c.id_cargo='{cargo}'")
         if sexo:
-            filtros.append(f"sexo='{sexo}'")
+            filtros.append(f"e.sexo='{sexo}'")
         if area:
-            filtros.append(f"area_y_departamento='{area}'")
-            
+            filtros.append(f"d.id_depto='{area}'")
 
-        filtro = " AND ".join(filtros) if filtros else "1=1"  # Default to no filter
-        data_table = self.consultar(filtro)
+        if len(filtros) > 1:
+            filtro = " AND ".join(filtros) if filtros else ""
+            data_table = self.bsd_interaction.consultar_trabajadores(filtro)
+        elif len(filtros) == 0:
+            data_table = self.bsd_interaction.consultar_trabajadores(filtro="")
+        else:
+            data_table=self.bsd_interaction.consultar_trabajadores(filtro=filtros[0])
+            
 
         self.data_table_container.controls.clear()
         self.data_table_container.controls.append(data_table)
         self.page.update()
 
-    # Función que reinicia los filtros
-    def reset_filters(self,e):
-        self.cargo_filter.value=""
-        self.sexo_filter.value=""
-        self.area_filter.value=""
+    def reset_filters(self, e):
+        self.cargo_filter.value = ""
+        self.sexo_filter.value = ""
+        self.area_filter.value = ""
         self.apply_filters(None)
         self.page.update()
-    
-    # Función que consulta los trabajadores en la base de datos   
-    def consultar(self, filtro=""):
-        database = "correosyury.db"
-
-        mydt = DataTable(
-            bgcolor="WHITE",
-            heading_row_color=ft.colors.BLACK87,
-            border=ft.border.all(2, "BLACK"),
-            border_radius=10,
-            vertical_lines=ft.border.BorderSide(1, "BLACK"),
-            horizontal_lines=ft.border.BorderSide(2, ""),
-            columns=[
-                ft.DataColumn(ft.Text(value="#")),
-                ft.DataColumn(ft.Text(value="Rut")),
-                ft.DataColumn(ft.Text(value="Nombre")),
-                ft.DataColumn(ft.Text(value="Sexo")),
-                ft.DataColumn(ft.Text(value="Direccion")),
-                ft.DataColumn(ft.Text(value="Telefono")),
-                ft.DataColumn(ft.Text(value="Cargo")),
-                ft.DataColumn(ft.Text(value="Fecha-ingreso")),
-                ft.DataColumn(ft.Text(value="Area y depto."))
-            ],
-            rows=[]
-        )
-
-        # Connect to the database
-        conn = sqlite3.connect(database)
-        cur = conn.cursor()
-
-        # EJECUTAR CONSULTAS DE FILTRO
-        query = f"SELECT * FROM trabajadores WHERE {filtro}"
-        cur.execute(query)
-
-        # Fetch the results
-        result = cur.fetchall()
-
-        # OBTENER NOMBRES DE COLUMNAS
-        columns = [column[0] for column in cur.description]
-
-        # CREAR DICIONARIOS CON LOS RESULTADOS
-        rows = [dict(zip(columns, row)) for row in result]
-
-        # AÑADIR FILAS A LA TABLA
-        for i, row in enumerate(rows):
-            i += 1
-            mydt.rows.append(
-                DataRow(cells=[
-                    DataCell(ft.Text(str(i), color="BLACK")),
-                    DataCell(ft.Text(value=row["rut"], color="BLACK")),
-                    DataCell(ft.Text(value=row["nombre"], color="BLACK")),
-                    DataCell(ft.Text(value=row["sexo"], color="BLACK")),
-                    DataCell(ft.Text(value=row["direccion"], color="BLACK")),
-                    DataCell(ft.Text(value=row["telefono"], color="BLACK")),
-                    DataCell(ft.Text(value=row["cargo"], color="BLACK")),
-                    DataCell(ft.Text(value=row["fecha_ingreso"], color="BLACK")),
-                    DataCell(ft.Text(value=row["area_y_departamento"], color="BLACK"))
-                ])
-            )
-
-        conn.close()
-        return mydt

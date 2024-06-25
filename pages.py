@@ -6,14 +6,7 @@ from datetime import datetime
 import sqlite3
 import time
 
-class Tables:
-    def __init__(self):
-        self.bsclasses=bsdinteraction()
-        self.mydt=self.bsclasses.consultar("Nombre")
-        self.table = Column([self.mydt], scroll=True, expand=1, horizontal_alignment=MainAxisAlignment.START)
 
-    def datatable(self):
-        return self.table
 
 class LoginPage:
     def __init__(self, page:Page,app_state):
@@ -149,6 +142,7 @@ class RegisterPage:
             dialog.open = True
             self.rut_user.value = ""
             self.page.update()
+            time.sleep(4)
             self.page.go("/")
         else:
             self.show_error_dialog("El rut ingresado no corresponde o ya existe un usuario, si se trata de un error, contacte a su supervisor o intente ingresarlo nuevamente")
@@ -175,7 +169,7 @@ class DashboardPage:
         self.navbar = AppBar(
             leading=IconButton(icons.DOOR_BACK_DOOR_OUTLINED, on_click=self.disconnectt),
             center_title=False,
-            bgcolor="#000000",
+            bgcolor="#365097",
             actions=[self.start, self.listaEmp, self.forms, self.datos]
         )
 
@@ -247,7 +241,7 @@ class ProfilePage:
         ],
             visible=False)
 
-        self.direccion = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Direccion",label_style=TextStyle(color="WHITE"))
+        self.direccion = TextField(value="", color="WHITE", height=60,width=450, read_only=True, bgcolor="BLACK", label="Direccion",label_style=TextStyle(color="WHITE"))
         self.telefono = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Telefono",label_style=TextStyle(color="WHITE"))
         self.cargo = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Cargo",label_style=TextStyle(color="WHITE"))
         self.fecha = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Fecha de ingreso",label_style=TextStyle(color="WHITE"))
@@ -368,58 +362,38 @@ class ProfilePage:
         )
     # Funcion que carga los contactos que tiene el trabajador
     def load_contactos_emergencia(self):
-        conn = sqlite3.connect("correosyury.db")
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM ContactosEmp WHERE trabajador_rut=?", (self.rut.value,))
-        rows = cur.fetchall()
-
-        conn.close()
-
-        self.contactos_emergencia_container.controls.clear()
-        for row in rows:
-            contacto = Row(controls=[
-                TextField(value=row[1], color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Nombre",label_style=TextStyle(color="WHITE")),
-                Dropdown(disabled=True,width=200, color="WHITE", value=row[2], options=[
-                    dropdown.Option("1", text="Padre"),
-                    dropdown.Option("2", text="Madre"),
-                    dropdown.Option("3", text="Hijo/a"),
-                    dropdown.Option("4", text="Hermano/a"),
-                    dropdown.Option("5", text="Primo/a"),
-                    dropdown.Option("6", text="Conyuge")
-                ]),
-                TextField(value=row[3], color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Teléfono",label_style=TextStyle(color="WHITE"))
-            ])
-            self.contactos_emergencia_container.controls.append(contacto)
-        self.page.update()
+        contactos=self.app_state.obtener_cargas_contactos(self.rut.value)[1]
+        print(contactos)
+        
+        if contactos:
+            self.contactos_emergencia_container.controls.clear()
+            for row in contactos:
+                contacto = Row(controls=[
+                    TextField(value=row[0], color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Nombre",label_style=TextStyle(color="WHITE")),
+                    TextField(value=row[1], color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Parentesco",label_style=TextStyle(color="WHITE")),
+                    TextField(value=row[2], color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Teléfono",label_style=TextStyle(color="WHITE"))
+                ])
+                self.contactos_emergencia_container.controls.append(contacto)
+            self.page.update()
+        else:
+            print("No hay contactos de emergencia")
 
     # Funcion que carga las cargas familiares que tiene el trabajador
     def load_cargas_familiares(self):
-        conn = sqlite3.connect("correosyury.db")
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM CargaEmp WHERE trabajador_rut=?", (self.rut.value,))
-        rows = cur.fetchall()
-        conn.close()
-
+        cargas=self.app_state.obtener_cargas_contactos(self.rut.value)[0]
+        print(cargas)
         self.cargas_familiares_container.controls.clear()
-        for row in rows:
-            carga = Row(controls=[
-                TextField(value=row[1], color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Rut",label_style=TextStyle(color="WHITE")),
-                TextField(value=row[2], color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Nombre",label_style=TextStyle(color="WHITE")),
-                Dropdown(disabled=True,width=200, color="BLACK", value=row[3], options=[
-                    dropdown.Option("F"),
-                    dropdown.Option("M")
-                ]),
-                Dropdown(disabled=True,width=200, color="BLACK", value=row[4], options=[
-                    dropdown.Option("1", text="Padre"),
-                    dropdown.Option("2", text="Madre"),
-                    dropdown.Option("3", text="Hijo/a"),
-                    dropdown.Option("4", text="Hermano/a"),
-                    dropdown.Option("5", text="Primo/a"),
-                    dropdown.Option("6", text="Conyuge")
+        if cargas:
+            
+            for row in cargas:
+                carga = Row(controls=[
+                    TextField(value=row[0], color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Nombre",label_style=TextStyle(color="WHITE")),
+                    TextField(value=row[1], color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Parentesco",label_style=TextStyle(color="WHITE"))
                 ])
-            ])
-            self.cargas_familiares_container.controls.append(carga)
-        self.page.update()
+                self.cargas_familiares_container.controls.append(carga)
+            self.page.update()
+        else:
+            print("No hay cargas familiares")
 
     # Funcion que eliminar un contacto de emergencia
     def mostrar_eliminar_contacto_dialog(self, e):
@@ -663,16 +637,15 @@ class ProfilePage:
         if data:
             self.rut.value = data[0][0]
             self.nombre.value = data[0][1]
-            self.genero.value = data[0][2]
-            if self.genero.value == "F":
-                self.genero.value = "Femenino"
-            else:
-                self.genero.value = "Masculino"
-            self.direccion.value = data[0][3]
-            self.telefono.value = data[0][4]
+            self.apellido.value = data[0][2]
+            self.genero.value = data[0][3]
+            self.fecha.value = data[0][4]
             self.cargo.value = data[0][5]
-            self.fecha.value = data[0][6]
-            self.area.value = data[0][7]
+            self.area.value = data[0][6]
+            self.direccion.value = data[0][7]
+            self.telefono.value = data[0][8]
+
+            self.area.value = data[0][6]
             self.load_cargas_familiares()
             self.load_contactos_emergencia()
             self.page.update()
@@ -730,12 +703,25 @@ class FormPage:
          
     def build_forms(self):
     #TEXTFIELDS PARA FORMULARIOS
-        ##DATOS PERSONALES
+        ##DATOS PERSONALES 
+        self.rut=TextField(value="",color="BLACK",width=200, hint_text="Rut con guion")
         self.nombres=TextField(value="",color="BLACK",width=200)
         self.apellidos=TextField(value="",color="BLACK",width=200)
-        self.rut=TextField(value="",color="BLACK",width=200, hint_text="Rut con guion")
-        self.sexo=Dropdown(width=100,options=[dropdown.Option("M"),dropdown.Option("F")])
-        self.direccion=TextField(value="", width=200)
+        self.sexo=Dropdown(label="Sexo",width=100,options=[dropdown.Option("M"),dropdown.Option("F")])
+        self.calle=TextField(value="", width=200)
+        self.complemento=TextField(value="", width=200)
+        self.comuna=Dropdown(width=200,options=[
+            dropdown.Option("Santiago"),
+            dropdown.Option("Providencia"),
+            dropdown.Option("Las Condes"),
+            dropdown.Option("La Florida"),
+            dropdown.Option("Puente Alto"),
+            dropdown.Option("Ñuñoa"),
+            dropdown.Option("Maipú"),
+            dropdown.Option("La Reina"),
+            dropdown.Option("Vitacura"),
+            dropdown.Option("Peñalolén"),
+            ])
         self.telefono=TextField(value="",color="BLACK",width=200)
 
         #DATOS LABORALES
@@ -826,19 +812,21 @@ class FormPage:
                     horizontal_alignment=CrossAxisAlignment.START,
                     controls=[
                         Row(controls=[
-                            Text(value="NOMBRES: ",size=20),
+                            
                             self.nombres,
-                            Text(value="APELLIDOS: ",size=20),
+                            
                             self.apellidos,
-                            Text(value="RUT: ",size=20),
+                            
                             self.rut,
-                            Text(value="SEXO: ",size=20),
+                            
                             self.sexo
                         ]),
+                        Row(width=100)
+                        ,
                         Row(controls=[
-                            Text(value="DIRECCION: ",size=20),
-                            self.direccion,
-                            Text(value="TELEFONO: ",size=20),
+                            self.calle,
+                            self.complemento,
+                            self.comuna, 
                             self.telefono  
                         ]    
                         )  

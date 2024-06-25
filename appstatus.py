@@ -9,11 +9,13 @@ class AppState:
         self.username = ""
         self.data_array = ""
         self.bsd = bsdinteraction()
+        self.conex=self.bsd.connection()
 
     def set_username(self, username):
         self.username = username
     
     def get_username(self):
+        print(self.username)
         return self.username
 
     def set_data(self, data):
@@ -24,8 +26,6 @@ class AppState:
 
     def formulary_to_db(self, form):
         self.form = form
-
-        
         interact = self.bsd
         interact.data_to_db(form)
 
@@ -60,8 +60,9 @@ class AppState:
     def add_contacto_emergencia(self, nombre, relacion, telefono, trabajador_rut):
         
         try:
-            conn = sqlite3.connect("correosyury.db")
-            cur = conn.cursor()
+            con=self.bsd.obtener_conexion()
+            
+            cur = con.cursor()
             cur.execute("INSERT INTO ContactosEmp (nombre, relacion_id, telefono, trabajador_rut) VALUES (?, ?, ?, ?)",
                         (nombre, relacion, telefono, trabajador_rut))
             conn.commit()
@@ -71,18 +72,36 @@ class AppState:
 
     # Función que obtiene las cargas familiares y contactos de un trabajador en específico y los carga en listas
     def obtener_cargas_contactos(self, rut_trabajador):
+        print(rut_trabajador)
+        
+        cur = self.conex.cursor()
         try:
-            conn = sqlite3.connect("correosyury.db")
-            cur = conn.cursor()
-            cur.execute("SELECT rut, nombre, genero, parentesco_id FROM CargaEmp WHERE trabajador_rut=?", (rut_trabajador,))
+            cur.execute("""
+                SELECT cf.nombre_familiar, p.relacion
+                FROM carga_familiar cf
+                JOIN parentesco p ON cf.parentesco_id = p.id_parentesco
+                JOIN empleado e ON cf.rut_emp = e.rut
+                WHERE cf.rut_emp = :1
+            """, (rut_trabajador,))
             cargas_familiares = cur.fetchall()
-
-            cur.execute("SELECT nombre, relacion_id, telefono FROM ContactosEmp WHERE trabajador_rut=?", (rut_trabajador,))
+            
+            cur.execute("""
+                SELECT 
+                    co.nombre_contacto,
+                    pa.relacion,
+                    t.num_telefono
+                FROM contacto co
+                JOIN telefono t ON co.telefono_id = t.id_telefono
+                JOIN parentesco pa ON co.parentesco_id = pa.id_parentesco
+                WHERE co.rut_emp = :1
+            """, (rut_trabajador,))
+            
             contactos_emergencia = cur.fetchall()
-
-            conn.close()
-
+            
+            print(cargas_familiares, contactos_emergencia)
             return cargas_familiares, contactos_emergencia
         except Exception as e:
             print(f"Error al obtener cargas y contactos de emergencia: {str(e)}")
             return [], []
+        finally:
+            cur.close()
