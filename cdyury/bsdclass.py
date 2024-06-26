@@ -244,44 +244,71 @@ class bsdinteraction():
             
 
     # Extraer datos de ContactosEmp
-        contactos = array.get('ContactosEmp', [])
-        if contactos:
-            for contacto in contactos:
-                nombre = contacto.get('nombre')
-
-                # Omitir contacto si el nombre está vacío o es None
-                if not nombre or nombre.strip() == '':
-                    print("dato vacio")
-                    continue
-                
-                # Validar que todos los campos están llenos o vacíos
-                if all(valor is None or len(str(valor).strip()) == 0 for valor in contacto.values()):
-                    continue  # Contacto completamente vacío, omitir
-                if any((valor is not None and len(str(valor).strip()) > 0) for valor in contacto.values()) and \
-                   any((valor is None or len(str(valor).strip()) == 0) for valor in contacto.values()):
-                    print("Los campos en ContactosEmp deben estar completamente completados o completamente vacíos.")
-
-                relacion = contacto.get('relacion')
-                telefono = contacto.get('telefono')
-
-
-                # Insertar el contacto en la base de datos
-                try:
-                    con = self.connection()
-                    cursor= con.cursor()
-                    sql_insert = """
-                    INSERT INTO ContactosEmps (nombre, relacion, telefono)
-                    VALUES (:1, :2, :3)
-                    """
-                    cursor.execute(sql_insert, (nombre, relacion, telefono))
-                    self.con.commit()
-                    print("Datos insertados correctamente en la tabla ContactosEmp.")
-                except cx_Oracle.Error as error:
-                    print("Error al insertar datos en la tabla ContactosEmp:", error)
-                finally:
-                    cursor.close()
+    #    contactos = array.get('ContactosEmp', [])
+    #    if contactos:
+    #        for contacto in contactos:
+    #            nombre = contacto.get('nombre')
+#
+    #            # Omitir contacto si el nombre está vacío o es None
+    #            if not nombre or nombre.strip() == '':
+    #                print("dato vacio")
+    #                continue
+    #            
+    #            # Validar que todos los campos están llenos o vacíos
+    #            if all(valor is None or len(str(valor).strip()) == 0 for valor in contacto.values()):
+    #                continue  # Contacto completamente vacío, omitir
+    #            if any((valor is not None and len(str(valor).strip()) > 0) for valor in contacto.values()) and \
+    #               any((valor is None or len(str(valor).strip()) == 0) for valor in contacto.values()):
+    #                print("Los campos en ContactosEmp deben estar completamente completados o completamente vacíos.")
+#
+    #            relacion = contacto.get('relacion')
+    #            telefono = contacto.get('telefono')
+#
+#
+    #            # Insertar el contacto en la base de datos
+    #            try:
+    #                con = self.connection()
+    #                cursor= con.cursor()
+    #                sql_insert = """
+    #                INSERT INTO ContactosEmps (nombre, relacion, telefono)
+    #                VALUES (:1, :2, :3)
+    #                """
+    #                cursor.execute(sql_insert, (nombre, relacion, telefono))
+    #                self.con.commit()
+    #                print("Datos insertados correctamente en la tabla ContactosEmp.")
+    #            except cx_Oracle.Error as error:
+    #                print("Error al insertar datos en la tabla ContactosEmp:", error)
+    #            finally:
+    #                cursor.close()
                     
-        
+        cargas = array.get('CargaEmp', [])
+        for carga in cargas:
+            
+            rut = carga.get('rut')
+            if not rut or rut.strip() == '':
+                continue
+            
+            if all(valor is None or len(str(valor).strip()) == 0 for valor in carga.values()):
+                continue
+
+            nombre = carga.get('nombre')
+            parentesco = carga.get('parentesco')
+
+            # Insertar la carga familiar en la base de datos
+            try:
+                con=self.connection()
+                cursor = con.cursor()
+                sql_insert = """
+                INSERT INTO CargaEmpss (rut, nombre, parentesco)
+                VALUES (:1, :2, :3)
+                """
+                cursor.execute(sql_insert, (rut, nombre, parentesco))
+                self.con.commit()
+                print("Datos insertados correctamente en la tabla CargaEmp.")
+            except cx_Oracle.Error as error:
+                print("Error al insertar datos en la tabla CargaEmp:", error)
+            finally:
+                cursor.close()
    
     #Obtiene los datos de los trabajadores para mostrar en la tabla
     def consultar_trabajadores(self, filtro):
