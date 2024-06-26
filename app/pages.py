@@ -1076,16 +1076,25 @@ class FormPage:
         # Validación de CargaEmp
         cargas = formulario.get("CargaEmp", [])
         print("Cargas       as",cargas)
-        for carga in cargas:
-          # Validación del formato del RUT si está presente
-          rut = carga.get("rut", "")
-          if rut:
-              if not (len(rut) == 9 or len(rut) == 10) and ("-" not in rut):
-                  return False, "El campo rut en CargaEmp debe tener 9 o 10 caracteres con guion si está presente."
 
-          # Verificar que todos los campos estén llenos y que el nombre no contenga números
-          if not all(carga.get(field) and carga.get(field).strip() and not any(char.isdigit() for char in carga.get(field).strip()) for field in ["rut", "nombre", "parentesco"]):
-              return False, "Todos los campos en CargaEmp deben estar llenos y el nombre no debe contener números."
+        for carga in cargas:
+            # Verificar si todos los campos están vacíos o completos
+            if any(valor and len(valor.strip()) > 0 for valor in carga.values()):
+                if any(valor is None or len(valor.strip()) == 0 for valor in carga.values()):
+                    return False, "Los campos en CargaEmp deben estar completamente completados o completamente vacíos."
+        
+                # Validar el campo rut
+                rut = carga["rut"]
+                if not (isinstance(rut, str) and 
+                        rut.replace("-", "").isdigit() and 
+                        len(rut) in [9, 10] and 
+                        rut[-2] == "-"):
+                    return False, "El campo rut en CargaEmp debe tener formato válido (9 o 10 caracteres con guion en el penúltimo carácter)."
+        
+                # Validar el campo nombre
+                nombre = carga["nombre"]
+                if any(char.isdigit() for char in nombre):
+                    return False, "El campo nombre en CargaEmp no debe contener números."
             
         return True, "Todos los datos son válidos."
 
