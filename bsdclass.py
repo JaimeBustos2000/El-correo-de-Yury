@@ -22,8 +22,6 @@ class bsdinteraction():
         self.connection()
 
 
-    
-
     def connection(self):
         # Construct the DSN (Data Source Name)
         dsn = cx_Oracle.makedsn(self.__hostname, self.__port, service_name=self.__service_name)
@@ -123,7 +121,7 @@ class bsdinteraction():
         else:
             return False
 
-    # Método para duplicar la base de datos de trabajadores a la base de datos de usuarios / test
+    """# Método para duplicar la tabla empleados a ficha (relacionada a usuarios) / test
     def duplicate(self):
         self.__database="correosyury.db"
         
@@ -147,7 +145,7 @@ class bsdinteraction():
             
         conexion_destino.commit()
         conexion_origen.close()
-        conexion_destino.close()
+        conexion_destino.close()"""
         
     #Obtiene todos los datos del usuario para el perfil y creacion de usuarios
     def fetch_data(self,name):
@@ -212,76 +210,9 @@ class bsdinteraction():
         
     #Actualiza los datos del usuario
     def data_to_db(self, array):
-        self.__database = "correosyury.db"
-        
-        conn = sqlite3.connect(self.__database)
-        cursor = conn.cursor()
-   
-
-        
-        # Concatenar nombres y apellidos // OMITIR DADO QUE DEBEN ESTAR SEPARADO EL NOMBRE DEL APELLIDO
-        data_empleado = array["DataEmpleado"]
-        nombre_completo = f"{data_empleado['nombres']} {data_empleado['apellidos']}"
-        
-        
-        # Insertar datos en las tablas Trabajadores, ContactosEmp y CargaEmp // SEGUN ORACLE
-        """
-        
-        """
-        try:
-            # Insertar datos en la tabla Trabajadores
-            cursor.execute('''
-            INSERT INTO trabajadores (rut, nombre, sexo, direccion, telefono, cargo, fecha_ingreso, area_y_departamento)
-            VALUES (?, ?, ?, ?, ?, (SELECT id FROM Cargos WHERE nombre = ?), ?, (SELECT id FROM Departamento WHERE nombre = ?))
-            ''', (data_empleado['rut'], nombre_completo, data_empleado['sexo'], data_empleado['direccion'], data_empleado['telefono'], data_empleado['cargo'], data_empleado['fecha'], data_empleado['areaDepto']))
-
-            # Insertar datos en la tabla ContactosEmp
-            contactos_emp = array["ContactosEmp"]
-            for contacto in contactos_emp:
-                if contacto["nombre"]:  # Sólo insertar si el nombre no está vacío
-                    relacion_id = None
-                    if contacto["relacion"]:
-                        cursor.execute('SELECT id FROM Parentescos WHERE nombre = ?', (contacto["relacion"],))
-                        row = cursor.fetchone()
-                        if row:
-                            relacion_id = row[0]
-
-                    cursor.execute('''
-                    INSERT INTO ContactosEmp (nombre, relacion_id, telefono, trabajador_rut)
-                    VALUES (?, ?, ?, ?)
-                    ''', (contacto["nombre"], relacion_id, contacto["telefono"], data_empleado['rut']))
-
-            # Insertar datos en la tabla CargaEmp
-            cargas_emp = array["CargaEmp"]
-            for carga in cargas_emp:
-                if carga["rut"]:  # Sólo insertar si el rut no está vacío
-                    parentesco_id = None
-                    if carga["parentesco"]:
-                        cursor.execute('SELECT id FROM Parentescos WHERE nombre = ?', (carga["parentesco"],))
-                        row = cursor.fetchone()
-                        if row:
-                            parentesco_id = row[0]
-
-                    cursor.execute('''
-                    INSERT OR IGNORE INTO CargaEmp (rut, nombre, genero, parentesco_id, trabajador_rut)
-                    VALUES (?, ?, ?, ?, ?)
-                    ''', (carga["rut"], carga["nombre"], carga["genero"], parentesco_id, data_empleado['rut']))
-
-            message = "Datos ingresados correctamente"
-        except sqlite3.Error as e:
-            print("Error:", e)
-            message = str(e)
-            return message
-
-        self.duplicate()
-        # Confirmar las operaciones
-        conn.commit()
-
-        # Cerrar la conexión
-        conn.close()
-
-        return message    
+        print(array)
     
+    #Obtiene los datos de los trabajadores para mostrar en la tabla
     def consultar_trabajadores(self, filtro):
         if filtro=="":
             filtro = "1=1"
@@ -352,10 +283,9 @@ class bsdinteraction():
         return mydt
     
     def existe_rut(self,rut):
-        print(rut)
         cur=self.conn.cursor()
         try:
-            sql = "SELECT * FROM trabajadores WHERE rut = :rut"
+            sql = "SELECT * FROM empleado WHERE rut = :rut"
             cur.execute(sql, {'rut': rut})
             trabajadores = cur.fetchall()
             print(trabajadores)

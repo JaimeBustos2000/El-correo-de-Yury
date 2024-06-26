@@ -5,7 +5,7 @@ from appstatus import AppState
 from datetime import datetime
 import sqlite3
 import time
-
+import re
 
 
 class LoginPage:
@@ -703,50 +703,51 @@ class FormPage:
          
     def build_forms(self):
     #TEXTFIELDS PARA FORMULARIOS
-        ##DATOS PERSONALES 
-        self.rut=TextField(value="",color="BLACK",width=200, hint_text="Rut con guion")
-        self.nombres=TextField(value="",color="BLACK",width=200)
-        self.apellidos=TextField(value="",color="BLACK",width=200)
-        self.sexo=Dropdown(label="Sexo",width=100,options=[dropdown.Option("M"),dropdown.Option("F")])
-        self.calle=TextField(value="", width=200)
-        self.complemento=TextField(value="", width=200)
-        self.comuna=Dropdown(width=200,options=[
-            dropdown.Option("Santiago"),
-            dropdown.Option("Providencia"),
-            dropdown.Option("Las Condes"),
-            dropdown.Option("La Florida"),
-            dropdown.Option("Puente Alto"),
-            dropdown.Option("Ñuñoa"),
-            dropdown.Option("Maipú"),
-            dropdown.Option("La Reina"),
-            dropdown.Option("Vitacura"),
-            dropdown.Option("Peñalolén"),
+        ##DATOS PERSONALES
+        
+        self.rut=TextField(value="",color="BLACK",width=200, hint_text="Rut con guion",label="RUT",label_style=TextStyle(color="BLACK"))
+        self.nombres=TextField(value="",color="BLACK",width=200,label="Nombres",label_style=TextStyle(color="BLACK"))
+        self.apellidos=TextField(value="",color="BLACK",width=200,label="Apellidos",label_style=TextStyle(color="BLACK"))
+        self.sexo=Dropdown(label="Sexo",label_style=TextStyle(color="BLACK"),width=100,options=[dropdown.Option("M"),dropdown.Option("F")])
+        self.calle=TextField(value="", width=200,label="Calle(sin numero)",label_style=TextStyle(color="BLACK"))
+        self.complemento=TextField(value="", width=200,label="Complemento/numero casa",label_style=TextStyle(color="BLACK"))
+        self.comuna=Dropdown(label="Comuna",label_style=TextStyle(color="BLACK"),width=200,options=[
+            dropdown.Option("1",text="Santiago"),
+            dropdown.Option("2",text="Providencia"),
+            dropdown.Option("3",text="Las Condes"),
+            dropdown.Option("4",text="La Florida"),
+            dropdown.Option("5",text="Puente Alto"),
+            dropdown.Option("6",text="Ñuñoa"),
+            dropdown.Option("7",text="Maipú"),
+            dropdown.Option("8",text="La Reina"),
+            dropdown.Option("9",text="Vitacura"),
+            dropdown.Option("10",text="Peñalolén"),
             ])
-        self.telefono=TextField(value="",color="BLACK",width=200)
-
+        self.telefono=TextField(value="",color="BLACK",width=200,label="Telefono",label_style=TextStyle(color="BLACK"))
+        ########################################################################################
         #DATOS LABORALES
-        self.cargo=Dropdown(width=200,options=[
-            dropdown.Option("Jefe de envios"),
-            dropdown.Option("Gerente de RR.HH."),
-            dropdown.Option("Personal de RR.HH."),
-            dropdown.Option("Repartidor"),
+        
+        self.cargo=Dropdown(label="Cargo", label_style=TextStyle(color="BLACK"),width=200,options=[
+            dropdown.Option("1",text="Gerente de RR.HH."),
+            dropdown.Option("2",text="Personal de RR.HH."),
+            dropdown.Option("3",text="Jefe de envios"),
+            dropdown.Option("4",text="Repartidor"),
             ])
 
         # Fecha ingreso
         fecha_actual=datetime.now()
         fecha_actual=fecha_actual.strftime("%d-%m-%Y")
-        self.fecha=TextField(value=f"{fecha_actual}",color="BLACK",width=200, hint_text="Fecha de ingreso",text_size=15,text_align="CENTER")
+        self.fecha=TextField(value=f"{fecha_actual}",color="BLACK",width=200, hint_text="Fecha de ingreso",text_size=15,text_align="CENTER",label="Fecha de ingreso",label_style=TextStyle(color="BLACK"))
         
-        self.areaDepto=Dropdown(width=200,options=[
-            dropdown.Option("envios"),
-            dropdown.Option("recursos humanos"),
+        self.areaDepto=Dropdown(label="Departamento",label_style=TextStyle(color="BLACK"),width=200,options=[
+            dropdown.Option("1",text="envios"),
+            dropdown.Option("2",text="recursos humanos"),
             ])
 
         #DATOS DE CONTACTO
-        self.contacto1=TextField(value="",color="BLACK",width=200)
-        self.contacto2=TextField(value="",color="BLACK",width=200)
-
-        self.relacion1=Dropdown(width=200,color="WHITE",options=[
+        self.contacto1=TextField(value="",color="BLACK",width=200,label="Nombre contacto",label_style=TextStyle(color="BLACK"))
+        self.fonocon1=TextField(value="",color="BLACK",width=200,label="Telefono contacto",label_style=TextStyle(color="BLACK"))
+        self.relacion1=Dropdown(label="Relacion",label_style=TextStyle(color="BLACK"),width=200,options=[
             dropdown.Option("Padre"),
             dropdown.Option("Madre"),
             dropdown.Option("Hijo/a"),
@@ -755,7 +756,9 @@ class FormPage:
             dropdown.Option("Conyuge")
             ])
         
-        self.relacion2=Dropdown(width=200,color="WHITE",options=[
+        #contacto2
+        self.contacto2=TextField(value="",color="BLACK",width=200,label="Nombre contacto",label_style=TextStyle(color="BLACK"))
+        self.relacion2=Dropdown(label="Relacion",label_style=TextStyle(color="BLACK"),width=200,options=[
             dropdown.Option("Padre"),
             dropdown.Option("Madre"),
             dropdown.Option("Hijo/a"),
@@ -763,20 +766,17 @@ class FormPage:
             dropdown.Option("Primo/a"),
             dropdown.Option("Conyuge")
             ])
-
-        self.fonocon1=TextField(value="",color="BLACK",width=200)
-        self.fonocon2=TextField(value="",color="BLACK",width=200)
+        self.fonocon2=TextField(value="",color="BLACK",width=200,label="Telefono contacto",label_style=TextStyle(color="BLACK"))
 
         #DATOS DE CARGA FAMILIAR
         #carga 1
-        self.rut_carga1=TextField(value="",color="BLACK",width=200)
-        self.nombre_carga1=TextField(value="",color="BLACK",width=200)
-
-        self.genero_carga1=Dropdown(width=200,options=[
+        self.rut_carga1=TextField(value="",color="BLACK",width=200,label="Rut carga",label_style=TextStyle(color="BLACK"))
+        self.nombre_carga1=TextField(value="",color="BLACK",width=200,label="Nombre carga",label_style=TextStyle(color="BLACK"))
+        self.genero_carga1=Dropdown(label="Genero",label_style=TextStyle(color="BLACK"),width=200,options=[
             dropdown.Option("F"),
             dropdown.Option("M")])
 
-        self.parentesco1=Dropdown(width=200,color="WHITE",options=[
+        self.parentesco1=Dropdown(label="Relacion",label_style=TextStyle(color="BLACK"),width=200,options=[
             dropdown.Option("Padre"),
             dropdown.Option("Madre"),
             dropdown.Option("Hijo/a"),
@@ -786,14 +786,14 @@ class FormPage:
             ])
 
         #carga 2
-        self.rut_carga2=TextField(value="",color="BLACK",width=200)
-        self.nombre_carga2=TextField(value="",color="BLACK",width=200)
+        self.rut_carga2=TextField(value="",color="BLACK",width=200,label="Rut carga",label_style=TextStyle(color="BLACK"))
+        self.nombre_carga2=TextField(value="",color="BLACK",width=200,label="Nombre carga",label_style=TextStyle(color="BLACK"))
 
-        self.genero_carga2=Dropdown(width=200,options=[
+        self.genero_carga2=Dropdown(label="Genero",label_style=TextStyle(color="BLACK"),width=200,options=[
             dropdown.Option("F"),
             dropdown.Option("M")])
 
-        self.parentesco2=Dropdown(width=200,color="WHITE",options=[
+        self.parentesco2=Dropdown(label="Relacion",label_style=TextStyle(color="BLACK"),width=200,options=[
             dropdown.Option("Padre"),
             dropdown.Option("Madre"),
             dropdown.Option("Hijo/a"),
@@ -806,22 +806,17 @@ class FormPage:
         dataP=Container(
                 width=1366,
                 height=150,
-                bgcolor="#476EAA",
+                bgcolor="#5D8BD1",
                 content=Column(
                     spacing=1,
                     horizontal_alignment=CrossAxisAlignment.START,
                     controls=[
                         Row(controls=[
-                            
                             self.nombres,
-                            
                             self.apellidos,
-                            
                             self.rut,
-                            
                             self.sexo
-                        ]),
-                        Row(width=100)
+                        ])
                         ,
                         Row(controls=[
                             self.calle,
@@ -837,17 +832,14 @@ class FormPage:
         dataL=Container(
                 width=1366,
                 height=100,
-                bgcolor="#476EAA",
+                bgcolor="#5D8BD1",
                 content=Column(
                     spacing=1,
                     horizontal_alignment=CrossAxisAlignment.START,
                     controls=[
                         Row(controls=[
-                            Text(value="CARGO",size=20),
                             self.cargo,
-                            Text(value="FECHA DE INGRESO",size=20),
                             self.fecha,
-                            Text(value="AREA-DEPTO",size=20),
                             self.areaDepto
                         ])
                     ]
@@ -857,25 +849,19 @@ class FormPage:
         dataC=Container(
             width=1366,
             height=120,
-            bgcolor="#476EAA",
+            bgcolor="#5D8BD1",
             content=Column(
                 spacing=4,
                 horizontal_alignment=CrossAxisAlignment.START,
                 controls=[
                     Row(controls=[
-                        Text(value="Nombre contacto",size=20),
                         self.contacto1,
-                        Text(value="RELACION",size=20),
                         self.relacion1,
-                        Text(value="TELEFONO",size=20),
                         self.fonocon1
                     ]),
                     Row(controls=[
-                        Text(value="Nombre contacto",size=20),
                         self.contacto2,
-                        Text(value="RELACION",size=20),
                         self.relacion2,
-                        Text(value="TELEFONO",size=20),
                         self.fonocon2 
                     ])
                 ]
@@ -885,29 +871,21 @@ class FormPage:
         dataF=Container(
             width=1366,
             height=120,
-            bgcolor="#476EAA",
+            bgcolor="#5D8BD1",
             content=Column(
                 spacing=4,
                 horizontal_alignment=CrossAxisAlignment.START,
                 controls=[
                     Row(controls=[
-                        Text(value="Rut",size=20),
                         self.rut_carga1,
-                        Text(value="Nombre",size=20),
                         self.nombre_carga1,
-                        Text(value="Genero",size=20),
                         self.genero_carga1,
-                        Text(value="Parentesco",size=20),
                         self.parentesco1
                     ]),
                     Row(controls=[
-                        Text(value="Rut",size=20),
                         self.rut_carga2,
-                        Text(value="Nombre",size=20),
                         self.nombre_carga2,
-                        Text(value="Genero",size=20),
                         self.genero_carga2,
-                        Text(value="Parentesco",size=20),
                         self.parentesco2
                     ])
                 ]
@@ -941,6 +919,7 @@ class FormPage:
                 Text(value="CARGAS FAMILIARES",color="BLACK",size=20),
                 dataF])
         # CARTA QUE CONTIENE EL FORMULARIO
+        
         self.formulario=Card(
             width=1366,
             height=800,
@@ -958,15 +937,15 @@ class FormPage:
     def get_data(self):
         formulario = {
             "DataEmpleado": {
+                "rut": self.rut.value,
                 "nombres": self.nombres.value,
                 "apellidos": self.apellidos.value,
-                "rut": self.rut.value,
                 "sexo": self.sexo.value,
-                "direccion": self.direccion.value,
-                "telefono": self.telefono.value,
                 "cargo": self.cargo.value,
-                "fecha": self.fecha.value,
-                "areaDepto": self.areaDepto.value
+                "calle": self.calle.value,
+                "complemento": self.complemento.value,
+                "comuna": self.comuna.value,
+                "telefono": self.telefono.value
             },
             "ContactosEmp": [
                 {
@@ -978,35 +957,36 @@ class FormPage:
                     "nombre": self.contacto2.value,
                     "relacion": self.relacion2.value,
                     "telefono": self.fonocon2.value
-                    }
-                ],
+                }
+            ],
             "CargaEmp": [
-                    {
-                        "rut": self.rut_carga1.value,
-                        "nombre": self.nombre_carga1.value,
-                        "genero": self.genero_carga1.value,
-                        "parentesco": self.parentesco1.value
-                    },
-                    {
-                        "rut": self.rut_carga2.value,
-                        "nombre": self.nombre_carga2.value,
-                        "genero": self.genero_carga2.value,
-                        "parentesco": self.parentesco2.value
-                    }
-                ]
+                {
+                    "rut": self.rut_carga1.value,
+                    "nombre": self.nombre_carga1.value,
+                    "genero": self.genero_carga1.value,
+                    "parentesco": self.parentesco1.value
+                },
+                {
+                    "rut": self.rut_carga2.value,
+                    "nombre": self.nombre_carga2.value,
+                    "genero": self.genero_carga2.value,
+                    "parentesco": self.parentesco2.value
+                }
+            ]
         }
+        print(formulario)
         return formulario
         
     # VALIDA QUE LOS CAMPOS NO ESTEN VACIOS Y QUE EL RUT SEA VALIDO CON EL BOTON
     def dni_comp(self,e):
         self.__bsd=bsdinteraction()
         rut=self.rut.value
-        print(rut)
-        print(len(rut))
-        dni_exist=self.__bsd.check_user(rut)
-        print(dni_exist)
+        print("rut: ",rut)
+        print("Longitud rut:",len(rut))
+        dni_exist=self.__bsd.existe_rut(rut)
+        print("Existe rut:",dni_exist)
         
-        if 11>len(rut)<9 or rut=="":            
+        if len(rut) < 9 or len(rut) > 10  or rut == "" or (not "-" in rut):
             alt = AlertDialog(title=Text("Ingrese un rut valido"))  # MENSAJE DE ALERTA
             self.page.dialog = alt
             alt.open = True
@@ -1024,85 +1004,76 @@ class FormPage:
                 self.page.update()
     
     # VALIDA QUE LOS CAMPOS NO ESTEN VACIOS Y QUE EL RUT SEA VALIDO AL INGRESAR COMO DATO NUEVO
-    def campo_vacio(self):
-        def validar_rut(rut):
-            return 8 < len(rut) < 11 and not rut.endswith("-")
 
-        # Validar que un campo no esté vacío
-        def validar_campo(campo, clave=None):
-            # Validar sexo/género para que solo sea "F" o "M"
-            if clave in ["sexo", "genero"]:
-                return campo in ["F", "M"]
-            return len(campo) >= 3
+    def validar_datos(self):
+        formulario=self.get_data()
+        # Validación de DataEmpleado
+        data_empleado = formulario.get("DataEmpleado", {})
 
-        # Validar que todos los campos de un diccionario estén vacíos
-        def todos_vacios(d):
-            return all(not v for v in d.values())
+        for campo, valor in data_empleado.items():
+            if campo == "sexo":
+                if valor not in ['F', 'M']:
+                    return False, "El campo sexo del empleado debe ser 'F' o 'M'."
+                
+            elif campo=="cargo":
+                if valor not in ['1','2','3','4']:
+                    return False, "El campo cargo no corresponde a un valor valido."
+                
+            elif campo=="telefono":
+                print(len(valor.strip()))
+                if len(valor.strip()) == 0 or not valor.isdigit():
+                    return False, "El campo telefono del empleado debe ser un número válido."
+                elif len(valor.strip()) not in [9, 10]:
+                    return False, "El campo telefono del empleado debe tener 9 o 10 dígitos."
+                
+            elif campo=="comuna":
+                if valor not in ['1','2','3','4','5','6','7','8','9','10']:
+                    return False, "El campo comuna del empleado no corresponde a un valor valido."
+            elif campo=="complemento":
+                if valor==None:
+                    return False, f"El campo {campo} no debe estar vacío."
+                if len(valor.strip()) == 0:
+                    return False, f"El campo {campo} no debe estar vacío."
+            else:
+                if valor==None:
+                    return False, f"El campo {campo} no debe estar vacío."
+                if len(valor.strip()) == 0:
+                    return False, f"El campo {campo} no debe estar vacío."
+                if campo != "nombres" and len(valor.strip()) < 3:
+                    return False, f"El campo {campo} debe tener longitud mayor a 3 caracteres."
 
-        # Validar que al menos un campo de un diccionario esté lleno
-        def validar_parcial(d):
-            return any(d.values()) and not all(d.values())
+        # Validación de formato de Rut en DataEmpleado
+        rut = data_empleado.get("rut", "")
+        if not (len(rut) == 9 or len(rut) == 10) or not rut.replace("-", "").isdigit():
+            return False, "El Rut en DataEmpleado debe tener formato válido (9 o 10 caracteres con guion)."
 
-        # Obtener los datos del formulario
-        formulario = self.get_data()
+        # Validación de ContactosEmp
+        contactos = formulario.get("ContactosEmp", [])
+        for contacto in contactos:
+            if any((valor is not None and len(valor.strip()) > 0) for valor in contacto.values()) and any((valor is None or len(valor.strip()) == 0) for valor in contacto.values()):
+                return False, "Los campos en ContactosEmp deben estar completamente completados o completamente vacíos."
+            
+            if contacto["telefono"] != "":
+                telefono = contacto["telefono"]
+                if not isinstance(telefono, str) or not telefono.isdigit() or len(telefono) not in [9, 10]:
+                    return False, "El campo telefono debe ser un número válido de 9 o 10 dígitos."
+            
 
-        # Llamada a las funciones de validación
-        for key, section in formulario.items():
-            if isinstance(section, dict):
-                for subkey, value in section.items():
-                    if isinstance(value, dict):  # Si es un diccionario anidado, iterar sobre sus elementos
-                        if subkey in ["contacto2", "Carga2"]:
-                            if todos_vacios(value):
-                                continue  # Si todos los campos están vacíos, saltar la validación
-                            if validar_parcial(value):
-                                return True, f"Error: todos los campos en {subkey} deben estar completos."
-                        for subsubkey, subvalue in value.items():
-                            if subsubkey == "rut":
-                                if not validar_rut(subvalue):
-                                    return True, f"Error: el RUT en {subkey} es inválido."
-                            elif not validar_campo(subvalue, subsubkey):
-                                return True, f"Error: el campo {subsubkey} en {subkey} debe tener al menos 5 caracteres o ser F/M para género."
-                    else:
-                        if subkey == "rut":
-                            if not validar_rut(value):
-                                return True, "Error: el RUT es inválido."
-                        elif not validar_campo(value, subkey):
-                            return True, f"Error: el campo {subkey} debe tener al menos 5 caracteres o ser F/M para género."
+        # Validación de CargaEmp
+        cargas = formulario.get("CargaEmp", [])
+        for carga in cargas:
+            if any(valor and len(valor.strip()) > 0 for valor in carga) and any(valor is None or len(valor.strip()) == 0 for valor in carga):
+                return False, "Los campos en las cargas deben estar completamente completados o completamente vacíos."
 
-        # Validar ContactosEmp y CargaEmp pueden estar vacíos, pero no incompletos
-        for section_key in ["ContactosEmp", "CargaEmp"]:
-            if section_key in formulario:
-                section = formulario[section_key]
-                if isinstance(section, list):
-                    for idx, item in enumerate(section):
-                        if todos_vacios(item):
-                            continue  # Si todos los campos están vacíos, saltar la validación
-                        if validar_parcial(item):
-                            return True, f"Error: todos los campos en {section_key} {idx + 1} deben estar completos."
-                        for subkey, value in item.items():
-                            if subkey == "rut":
-                                if not validar_rut(value):
-                                    return True, f"Error: el RUT en {section_key} {idx + 1} es inválido."
-                            elif not validar_campo(value, subkey):
-                                return True, f"Error: el campo {subkey} en {section_key} {idx + 1} debe tener al menos 5 caracteres o ser F/M para género."
-
-        # Si pasa todas las validaciones
-        # Crear una instancia de `bsdinteraction` y verificar si el RUT ya existe
-        self.bsd=bsdinteraction()
-        exist_dni=self.bsd.existe_rut(formulario["DataEmpleado"]["rut"])
-        if exist_dni:
-            return True, "Rut ya existe en la base de datos."
-        else:
-            self.app_state.formulary_to_db(formulario)
-            self.bsd.duplicate()
-            return False, "Formulario válido."
+        return True, "Todos los datos son válidos."
 
 
     # VALIDA QUE LOS CAMPOS NO ESTEN VACIOS Y QUE EL RUT SEA VALIDO AL INGRESAR COMO DATO NUEVO
     def validation_pass_form(self,e):  
-        is_invalid, message = self.campo_vacio()
-
-        if is_invalid:
+        is_invalid, message = self.validar_datos()
+        print(is_invalid, message)
+        
+        if not is_invalid:
             alt = AlertDialog(title=Text(message))  # Cambiar `message` por `Text(message)`
             self.page.dialog = alt
             alt.open = True
@@ -1115,6 +1086,9 @@ class FormPage:
             self.page.update()
             time.sleep(3)
             print("Correcto")
+            self.form=self.get_data()
+            self.app_state.formulary_to_db(self.form)
+
             self.clean_start(self.page)
     
     # LIMPIA LOS CAMPOS DEL FORMULARIO y redirige a la pagina de inicio

@@ -43,7 +43,7 @@ class AppState:
             print(f"Error al actualizar datos del trabajador: {str(e)}")
             return False
 
-    # Función que obtiene las cargas familiares de un trabajador en específico y los añade
+    # Función que obtiene las cargas familiares nuevas de un trabajador en específico y los añade
     def add_carga_familiar(self, rut, nombre, genero, parentesco, trabajador_rut):
         try:
             conn = sqlite3.connect("correosyury.db")
@@ -56,8 +56,8 @@ class AppState:
         except Exception as e:
             print(f"Error al agregar carga familiar: {str(e)}")
 
-    # Función que obtiene los contactos de emergencia de un trabajador en específico y los añade
-    def add_contacto_emergencia(self, nombre, relacion, telefono, trabajador_rut):
+    # Función que obtiene los contactos de emergencia nuevos de un trabajador en específico y los añade
+    """def add_contacto_emergencia(self, nombre, relacion, telefono, trabajador_rut):
         
         try:
             con=self.bsd.obtener_conexion()
@@ -68,7 +68,7 @@ class AppState:
             conn.commit()
             conn.close()
         except Exception as e:
-            print(f"Error al agregar contacto de emergencia: {str(e)}")
+            print(f"Error al agregar contacto de emergencia: {str(e)}")"""
 
     # Función que obtiene las cargas familiares y contactos de un trabajador en específico y los carga en listas
     def obtener_cargas_contactos(self, rut_trabajador):
