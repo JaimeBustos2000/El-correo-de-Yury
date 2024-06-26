@@ -211,7 +211,7 @@ class bsdinteraction():
         
     #Actualiza los datos del usuario
     def data_to_db(self, array):
-        print(array)
+        print("data to db:", array)
     
     #Obtiene los datos de los trabajadores para mostrar en la tabla
     def consultar_trabajadores(self, filtro):
