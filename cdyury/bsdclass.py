@@ -12,7 +12,6 @@ class bsdinteraction():
     def __init__(self):
         self.name:str
         self.role:str #Despues a añadir el rol
-        self.__database="correosyury.db"
         self.__hostname = 'localhost'  # Or the hostname/IP of your Oracle server
         self.__port = 1521             # Default port for Oracle XE
         self.__service_name = 'XE'     # Service name for Oracle XE
@@ -212,7 +211,78 @@ class bsdinteraction():
     #Actualiza los datos del usuario
     def data_to_db(self, array):
         print("data to db:", array)
-    
+        
+        
+        # data_empleado = array.get('DataEmpleado')
+        # 
+        # if data_empleado:
+        #     rut = data_empleado.get('rut')
+        #     nombres = data_empleado.get('nombres')
+        #     apellidos = data_empleado.get('apellidos')
+        #     sexo = data_empleado.get('sexo')
+        #     cargo = data_empleado.get('cargo')
+        #     calle = data_empleado.get('calle')
+        #     complemento = data_empleado.get('complemento')
+        #     comuna = data_empleado.get('comuna')
+        #     areaDepto = data_empleado.get('areaDepto')
+        #     telefono = data_empleado.get('telefono')
+        #      
+        # try:
+        #     con=self.connection()
+        #     cursor = con.cursor()
+        #     sql_insert = """
+        #     INSERT INTO Empleadosss (rut, nombres, apellidos, sexo, cargo, calle, complemento, comuna, areaDepto, telefono)
+        #     VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10)
+        #     """
+        #     cursor.execute(sql_insert, (rut, nombres, apellidos, sexo, cargo, calle, complemento, comuna, areaDepto, telefono))
+        #     self.con.commit()
+        #     print("Datos insertados correctamente en la tabla Empleados.")
+        # except cx_Oracle.Error as error:
+        #     print("Error al insertar datos en la tabla Empleados:", error)
+        # finally:
+        #     cursor.close()
+            
+
+    # Extraer datos de ContactosEmp
+        contactos = array.get('ContactosEmp', [])
+        if contactos:
+            for contacto in contactos:
+                nombre = contacto.get('nombre')
+
+                # Omitir contacto si el nombre está vacío o es None
+                if not nombre or nombre.strip() == '':
+                    print("dato vacio")
+                    continue
+                
+                # Validar que todos los campos están llenos o vacíos
+                if all(valor is None or len(str(valor).strip()) == 0 for valor in contacto.values()):
+                    continue  # Contacto completamente vacío, omitir
+                if any((valor is not None and len(str(valor).strip()) > 0) for valor in contacto.values()) and \
+                   any((valor is None or len(str(valor).strip()) == 0) for valor in contacto.values()):
+                    print("Los campos en ContactosEmp deben estar completamente completados o completamente vacíos.")
+
+                relacion = contacto.get('relacion')
+                telefono = contacto.get('telefono')
+
+
+                # Insertar el contacto en la base de datos
+                try:
+                    con = self.connection()
+                    cursor= con.cursor()
+                    sql_insert = """
+                    INSERT INTO ContactosEmps (nombre, relacion, telefono)
+                    VALUES (:1, :2, :3)
+                    """
+                    cursor.execute(sql_insert, (nombre, relacion, telefono))
+                    self.con.commit()
+                    print("Datos insertados correctamente en la tabla ContactosEmp.")
+                except cx_Oracle.Error as error:
+                    print("Error al insertar datos en la tabla ContactosEmp:", error)
+                finally:
+                    cursor.close()
+                    
+        
+   
     #Obtiene los datos de los trabajadores para mostrar en la tabla
     def consultar_trabajadores(self, filtro):
         if filtro=="":
