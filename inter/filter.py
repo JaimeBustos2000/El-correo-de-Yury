@@ -1,7 +1,7 @@
 import flet as ft
 from flet import *
 import sqlite3
-from bsdclass import bsdinteraction
+from cdyury.bsdclass import bsdinteraction
 
 # CLASE QUE CREA UNA INTERFAZ DE FILTRO PARA LOS TRABAJADORES
 

@@ -1,9 +1,9 @@
 import flet as ft
 from flet import *
-from bsdclass import bsdinteraction
-from table import Tables
-from pages import AppState,LoginPage,RegisterPage,DashboardPage,ProfilePage,FormPage
-from appstatus import AppState
+from cdyury.bsdclass import bsdinteraction
+from inter.table import Tables
+from app.pages import AppState,LoginPage,RegisterPage,DashboardPage,ProfilePage,FormPage
+from cdyury.appstatus import AppState
 
 
 # FUNCION QUE INICIA LA APLICACIÓN

@@ -1,6 +1,6 @@
 import flet as ft
 from flet import *
-from filter import FilterUI
+from inter.filter import FilterUI
 
 # CLASE QUE CREA UNA INTERFAZ DE TABLA PARA LOS TRABAJADORES Y SUS FILTROS
 class Tables:

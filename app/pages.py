@@ -1,7 +1,7 @@
 import flet as ft
 from flet import *
-from bsdclass import bsdinteraction
-from appstatus import AppState
+from cdyury.bsdclass import bsdinteraction
+from cdyury.appstatus import AppState
 from datetime import datetime
 import sqlite3
 import time
@@ -62,7 +62,6 @@ class LoginPage:
         user = self.get_username()
         password = self.get_password()
         conexion = bsdinteraction()
-        conexion.duplicate()
         validacion = conexion.login(user, password)
         if validacion:
             self.state.set_username(user)
@@ -175,7 +174,7 @@ class DashboardPage:
 
         self.inicio = Container(
             # Add the components of the inicio (home) page here.
-            content=Text("Welcome to the Dashboard", size=24, color="WHITE")
+            content=Text("Bienvenido al sistema de correos de yury", size=24, color="WHITE")
         )
 
         self.build_dashboard_page()
@@ -691,8 +690,6 @@ class ProfilePage:
         self.direccion.read_only = True
         self.telefono.read_only = True
         return self.cuenta
-
-
 
 # CLASE QUE CONTROLA EL FORMULARIO DE INGRESO DE DATOS
 class FormPage:

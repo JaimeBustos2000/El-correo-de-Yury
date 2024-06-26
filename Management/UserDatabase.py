@@ -1,5 +1,5 @@
 import cx_Oracle
-from UserMana import PasswordManager 
+from Management.UserMana import PasswordManager 
 
 class UserDatabase:
     def __init__(self):

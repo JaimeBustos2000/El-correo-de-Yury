@@ -1,5 +1,5 @@
-from UserDatabase import UserDatabase #archivo y clase para verificar el login del usuario
-from UserMana import PasswordManager #archivo y clase para hashear y descifrar contraseñas provenientes de la bsd
+from Management.UserDatabase import UserDatabase #archivo y clase para verificar el login del usuario
+from Management.UserMana import PasswordManager #archivo y clase para hashear y descifrar contraseñas provenientes de la bsd
 import sqlite3
 import flet as ft
 from flet import *
@@ -65,16 +65,17 @@ class bsdinteraction():
             cursor.execute("SELECT * FROM usuarios WHERE trabajador_rut = :rut", {'rut': rut})
             usuarios_result = cursor.fetchone()
 
-            print(trabajadores_result, usuarios_result)
+            print(trabajadores_result)
+            print(usuarios_result)
 
             # Si no se encuentra en trabajadores o en usuarios, retornar False
-            if trabajadores_result is None or (trabajadores_result is None and usuarios_result is None):
+            if len(trabajadores_result) == 0 or (trabajadores_result is None and usuarios_result is None):
                 return False
 
             # Si ya existe en usuarios, imprimir mensaje y retornar True
             if usuarios_result:
                 print("Rut ya posee usuario")
-                return True
+                return False
 
             
             # Si no existe en usuarios, crear nuevo usuario
