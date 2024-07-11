@@ -68,19 +68,18 @@ class AppState:
     
     # Aqui funciones no implementadas para ser tratadas en oracle pero con la logica necesaria para ser implementadas
     
+    def eliminar_carga_familiar(self,nombre_carga, rut_trabajador):
+        interact = self.bsd
+        interact.eliminar_carga_familiar(nombre_carga, rut_trabajador)
+        
+    def eliminar_contacto_emergencia(self,nombre_contacto, rut_trabajador):
+        interact = self.bsd
+        interact.eliminar_contacto(nombre_contacto, rut_trabajador)
+    
     # Función que obtiene los datos de un trabajador en específico y los actualiza
-    def update_employee_data(self, rut, genero, nombre, direccion, telefono):
-        try:
-            conn = sqlite3.connect("correosyury.db")
-            cur = conn.cursor()
-            cur.execute("UPDATE Trabajadores SET sexo=?, nombre=?, direccion=?, telefono=? WHERE rut=?",
-                        (genero, nombre, direccion, telefono, rut))
-            conn.commit()
-            conn.close()
-            return True
-        except Exception as e:
-            print(f"Error al actualizar datos del trabajador: {str(e)}")
-            return False
+    def update_employee_data(self, rut, nombre, apellido):
+        update=self.bsd.update_employee_data(rut,nombre, apellido)
+        return update
 
     # Función que obtiene las cargas familiares nuevas de un trabajador en específico y los añade
     def add_carga_familiar(self, rut, nombre, genero, parentesco, trabajador_rut):

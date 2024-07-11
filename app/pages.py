@@ -410,7 +410,7 @@ class ProfilePage:
     def confirmar_eliminar_contacto_emergencia(self, e):
         nombre_contacto = self.eliminar_contacto_dialog.content.controls[0].value
         trabajador_rut = self.rut.value
-        self.eliminar_contacto_por_nombre(nombre_contacto, trabajador_rut)
+        self.app_state.eliminar_contacto_emergencia(nombre_contacto, trabajador_rut)
         self.load_contactos_emergencia()
         self.eliminar_contacto_dialog.open = False
         self.page.update()
@@ -454,26 +454,10 @@ class ProfilePage:
             contacto = self.contactos_emergencia.pop()
             nombre_contacto = contacto['nombre'].value
             trabajador_rut = self.rut.value
-            self.eliminar_contacto_por_nombre(nombre_contacto, trabajador_rut)
+            self.app_state.eliminar_contacto_emergecia(nombre_contacto, trabajador_rut)
             self.contactos_emergencia_container.controls.pop()
         self.page.update()
         
-    # Elimina la carga familiar de la pantalla actual por nombre
-    def eliminar_carga_por_nombre(self, nombre, trabajador_rut):
-        conn = sqlite3.connect("correosyury.db")
-        cur = conn.cursor()
-        cur.execute("DELETE FROM CargaEmp WHERE nombre=? AND trabajador_rut=?", (nombre, trabajador_rut))
-        conn.commit()
-        conn.close()
-
-    #   Elimina el contacto de emergencia de la pantalla actual por nombre
-    def eliminar_contacto_por_nombre(self, nombre, trabajador_rut):
-        conn = sqlite3.connect("correosyury.db")
-        cur = conn.cursor()
-        cur.execute("DELETE FROM ContactosEmp WHERE nombre=? AND trabajador_rut=?", (nombre, trabajador_rut))
-        conn.commit()
-        conn.close()
-
     # Añade la interfaz de carga familiar a la pantalla
     def agregar_carga_familiar(self, e):
         rut_carga = TextField(value="", color="BLACK", height=40, bgcolor="WHITE", label="Rut", label_style=TextStyle(color="BLACK"))
@@ -509,7 +493,7 @@ class ProfilePage:
             carga = self.cargas_familiares.pop()
             nombre_carga = carga['nombre'].value
             trabajador_rut = self.rut.value
-            self.eliminar_carga_por_nombre(nombre_carga, trabajador_rut)
+            self.app_state.eliminar_carga_familiar(nombre_carga, trabajador_rut)
             self.cargas_familiares_container.controls.pop()
         self.page.update()
 
@@ -539,18 +523,11 @@ class ProfilePage:
     # funcion que obtiene los datos editables del trabajador
     def obtener_datos_editables(self, e):
         self.nombre.on_change = self.obtener_datos_editables
-        self.select_genero.on_change = self.obtener_datos_editables
-        self.direccion.on_change = self.obtener_datos_editables
-        self.telefono.on_change = self.obtener_datos_editables
+        self.apellido.on_change = self.obtener_datos_editables
 
-        genero = self.select_genero.value
+        apellido = self.apellido.value
         nombre = self.nombre.value
-        direccion = self.direccion.value
-        telefono = self.telefono.value
 
-        datap = [genero, nombre, direccion, telefono]
-
-        return datap
 
     # funcion que guarda los datos editables del trabajador y comprueba si hay cambios y demas
     def save_data(self, e):
@@ -558,14 +535,12 @@ class ProfilePage:
             self.show_error_dialog("No se han realizado cambios.")
             return
 
-        genero_actual = self.select_genero.value if self.select_genero.visible else self.genero.value
+        apellido_actual = self.apellido.value
         nombre_actual = self.nombre.value
-        direccion_actual = self.direccion.value
-        telefono_actual = self.telefono.value
         trabajador_rut = self.rut.value  # Rut del trabajador que ha iniciado sesión
 
         # Actualizar datos principales del empleado en la base de datos
-        if self.app_state.update_employee_data(trabajador_rut, genero_actual, nombre_actual, direccion_actual, telefono_actual):
+        if self.app_state.update_employee_data(trabajador_rut, nombre_actual,apellido_actual):
             # Obtener datos de cargas familiares y contactos de emergencia
             cargas = self.obtener_cargas_familiares()
             contactos = self.obtener_contactos_emergencia()
@@ -662,9 +637,8 @@ class ProfilePage:
 
         self.genero.visible = False
         self.select_genero.visible = True
+        self.apellido.read_only = False
         self.nombre.read_only = False
-        self.direccion.read_only = False
-        self.telefono.read_only = False
 
         # Asegurar que todos los contactos de emergencia y cargas familiares actuales sean editables
         for contacto in self.contactos_emergencia:
@@ -945,7 +919,8 @@ class FormPage:
                 "complemento": self.complemento.value,
                 "comuna": self.comuna.value,
                 "areaDepto": self.areaDepto.value,
-                "telefono": self.telefono.value
+                "telefono": self.telefono.value,
+                "fecha": self.fecha.value
             },
             "ContactosEmp": [
                 {
