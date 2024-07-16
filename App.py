@@ -2,7 +2,7 @@ import flet as ft
 from flet import *
 from cdyury.bsdclass import bsdinteraction
 from inter.table import Tables
-from app.pages import AppState,LoginPage,RegisterPage,DashboardPage,ProfilePage,FormPage
+from app.Formpage import AppState,LoginPage,RegisterPage,DashboardPage,ProfilePage,FormPage
 from cdyury.appstatus import AppState
 
 

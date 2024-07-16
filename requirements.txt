@@ -1,3 +1,4 @@
 cx_Oracle
 flet
 bcrypt
+python-dotenv

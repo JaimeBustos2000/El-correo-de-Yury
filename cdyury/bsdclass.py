@@ -1,8 +1,9 @@
 from Management.UserDatabase import UserDatabase #archivo y clase para verificar el login del usuario
 from Management.UserMana import PasswordManager #archivo y clase para hashear y descifrar contraseñas provenientes de la bsd
-import sqlite3
+from dotenv import load_dotenv
 import flet as ft
 from flet import *
+import os
 import cx_Oracle
 import random
 
@@ -10,18 +11,19 @@ import random
 #CLASE PRINCIPAL PARA INTERACTUAR CON LA BASE DE DATOS/PRELIMINAR PARA SEPARAR LOS REQUERIMIENTOS
 class bsdinteraction():
     def __init__(self):
-        self.name:str
-        self.role:str #Despues a añadir el rol
-        self.__hostname = 'localhost'  # Or the hostname/IP of your Oracle server
-        self.__port = 1521             # Default port for Oracle XE
-        self.__service_name = 'XE'     # Service name for Oracle XE
-        self.__username = 'app_user'   # Oracle username
-        self.__passw = '1234567Aa'     # Oracle user password
+        
         self.conn = None
         self.connection()
 
 
     def connection(self):
+        load_dotenv()
+        self.__hostname = str(os.getenv("Hostname"))
+        
+        self.__port = int(os.getenv("Port"))
+        self.__service_name = str(os.getenv("Service"))
+        self.__username = str(os.getenv("Username"))
+        self.__passw= str(os.getenv("Password"))
         # Construct the DSN (Data Source Name)
         dsn = cx_Oracle.makedsn(self.__hostname, self.__port, service_name=self.__service_name)
 
