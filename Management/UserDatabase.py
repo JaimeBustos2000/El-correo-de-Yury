@@ -9,7 +9,7 @@ class UserDatabase:
         self.username = 'app_user'   # Oracle username
         self.passw = '1234567Aa'     # Oracle user password
         # Configura la conexión a Oracle
-        dsn_tns = cx_Oracle.makedsn(self.hostname, self.port, self.service_name)
+        dsn_tns = cx_Oracle.makedsn(self.hostname, self.port, service_name=self.service_name)
         self.conn = cx_Oracle.connect(self.username ,self.passw, dsn=dsn_tns)
 
         # Inicializa la estructura de la base de datos si no existe
@@ -64,6 +64,3 @@ class UserDatabase:
             return is_valid
         finally:
             cursor.close()
-
-    def __del__(self):
-        self.conn.close()

@@ -59,7 +59,7 @@ class bsdinteraction():
 
         try:
             # Verificar si el rut está en la tabla trabajadores
-            cursor.execute("SELECT * FROM ficha WHERE rut = :rut", {'rut': rut})
+            cursor.execute("SELECT * FROM empleado WHERE rut = :rut", {'rut': rut})
             trabajadores_result = cursor.fetchone()
 
             # Verificar si el rut está en la tabla usuarios
@@ -80,8 +80,8 @@ class bsdinteraction():
 
             
             # Si no existe en usuarios, crear nuevo usuario
-            nombre=trabajadores_result[2]
-            apellido=trabajadores_result[3]
+            nombre=trabajadores_result[1]
+            apellido=trabajadores_result[2]
             username = str(nombre + apellido[:2]).lower()
 
             while True:
@@ -95,7 +95,7 @@ class bsdinteraction():
                 else:
                     break
 
-            # Crear hash de la contraseña
+            # Crear hash de la contraseña # Insertar el nuevo usuario en la tabla usuarios
             UserDatabase().create_user(rut, username, self.__hashpass)
 
             # Obtener el siguiente ID para el nuevo usuario
@@ -105,7 +105,7 @@ class bsdinteraction():
                 max_id = 0
             new_id = max_id + 1
 
-            # Insertar el nuevo usuario en la tabla usuarios
+            
 
 
             self.conn.commit()
@@ -122,32 +122,6 @@ class bsdinteraction():
             return True
         else:
             return False
-
-    """# Método para duplicar la tabla empleados a ficha (relacionada a usuarios) / test
-    def duplicate(self):
-        self.__database="correosyury.db"
-        
-        conexion_origen = sqlite3.connect(self.__database)
-
-        conexion_destino = sqlite3.connect("cdyusr.db")
-        
-        cursor_origen = conexion_origen.cursor()
-        cursor_destino = conexion_destino.cursor()
-       
-        query="DROP TABLE IF EXISTS trabajadores"
-        cursor_destino.execute(query)
-        query="CREATE TABLE IF NOT EXISTS trabajadores  (rut TEXT PRIMARY KEY, nombre TEXT NOT NULL, sexo TEXT NOT NULL, direccion TEXT NOT NULL, telefono TEXT, cargo TEXT NOT NULL, fecha_ingreso TEXT NOT NULL, area_y_departamento TEXT NOT NULL)"
-        cursor_destino.execute(query)
-     
-        cursor_origen.execute("SELECT * FROM trabajadores")
-        filas = cursor_origen.fetchall()
-        
-        for fila in filas:
-            cursor_destino.execute("INSERT OR IGNORE INTO trabajadores VALUES (?,?,?,?,?,?,?,?)", fila)
-            
-        conexion_destino.commit()
-        conexion_origen.close()
-        conexion_destino.close()"""
         
     #Obtiene todos los datos del usuario para el perfil y creacion de usuarios
     def fetch_data(self,name):
@@ -215,97 +189,144 @@ class bsdinteraction():
         print("data to db:", array)
         
         
-        # data_empleado = array.get('DataEmpleado')
-        # 
-        # if data_empleado:
-        #     rut = data_empleado.get('rut')
-        #     nombres = data_empleado.get('nombres')
-        #     apellidos = data_empleado.get('apellidos')
-        #     sexo = data_empleado.get('sexo')
-        #     cargo = data_empleado.get('cargo')
-        #     calle = data_empleado.get('calle')
-        #     complemento = data_empleado.get('complemento')
-        #     comuna = data_empleado.get('comuna')
-        #     areaDepto = data_empleado.get('areaDepto')
-        #     telefono = data_empleado.get('telefono')
-        #      
-        # try:
-        #     con=self.connection()
-        #     cursor = con.cursor()
-        #     sql_insert = """
-        #     INSERT INTO Empleadosss (rut, nombres, apellidos, sexo, cargo, calle, complemento, comuna, areaDepto, telefono)
-        #     VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10)
-        #     """
-        #     cursor.execute(sql_insert, (rut, nombres, apellidos, sexo, cargo, calle, complemento, comuna, areaDepto, telefono))
-        #     self.con.commit()
-        #     print("Datos insertados correctamente en la tabla Empleados.")
-        # except cx_Oracle.Error as error:
-        #     print("Error al insertar datos en la tabla Empleados:", error)
-        # finally:
-        #     cursor.close()
+        data_empleado = array.get('DataEmpleado')
+        
+        if data_empleado:
+            rut = data_empleado.get('rut')
+            nombres = data_empleado.get('nombres')
+            apellidos = data_empleado.get('apellidos')
+            sexo = data_empleado.get('sexo')
+            cargo = int(data_empleado.get('cargo'))
+            calle = data_empleado.get('calle')
+            complemento = data_empleado.get('complemento')
+            comuna = int(data_empleado.get('comuna'))
+            areaDepto = int(data_empleado.get('areaDepto'))
+            telefono = data_empleado.get('telefono')
+            fecha = data_empleado.get('fecha')
+        
+        try:
+            con=self.connection()
+            cursor=con.cursor()
+
+            cursor.execute("SELECT MAX(id_direccion) FROM direccion")
+            
+            max_id = cursor.fetchone()[0]
+            print(max_id)
+            if max_id:
+                new_id_dir = max_id + 1
+
+
+
+            sql_insert="""
+            INSERT INTO direccion (id_direccion,calle,complemento,comuna_id)
+            VALUES (:1,:2,:3,:4)
+            """
+            cursor.execute(sql_insert,(new_id_dir,calle,complemento,comuna))
+            con.commit()
+        finally:
+            cursor.close()
+        
+        try:
+            con=self.connection()
+            cursor=con.cursor()
+            cursor.execute("SELECT MAX(id_telefono) FROM telefono")
+            max_id_tel = cursor.fetchone()[0]
+            if max_id_tel:
+                max_id_tel += 1
+            
+            sql_insert="INSERT INTO telefono (id_telefono,num_telefono) VALUES (:1,:2)"
+            cursor.execute(sql_insert,(max_id_tel,telefono))
+            con.commit()
+        finally:
+            cursor.close()
+
+
+        try:
+            con=self.connection()
+            cursor = con.cursor()
+            sql_insert = """
+            INSERT INTO empleado (rut, nombres, apellidos, sexo, cargo_id, direccion_id, telefono_id, departamento_id, fecha_ing)
+            VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9)
+            """
+            cursor.execute(sql_insert, (rut, nombres, apellidos, sexo, cargo, new_id_dir, max_id_tel, areaDepto, fecha))
+            con.commit()
+            print("Datos insertados correctamente en la tabla Empleados.")
+        except cx_Oracle.Error as error:
+            print("Error al insertar datos en la tabla Empleados:", error)
+        finally:
+            cursor.close()
             
 
-    # Extraer datos de ContactosEmp
-    #    contactos = array.get('ContactosEmp', [])
-    #    if contactos:
-    #        for contacto in contactos:
-    #            nombre = contacto.get('nombre')
-#
-    #            # Omitir contacto si el nombre está vacío o es None
-    #            if not nombre or nombre.strip() == '':
-    #                print("dato vacio")
-    #                continue
-    #            
-    #            # Validar que todos los campos están llenos o vacíos
-    #            if all(valor is None or len(str(valor).strip()) == 0 for valor in contacto.values()):
-    #                continue  # Contacto completamente vacío, omitir
-    #            if any((valor is not None and len(str(valor).strip()) > 0) for valor in contacto.values()) and \
-    #               any((valor is None or len(str(valor).strip()) == 0) for valor in contacto.values()):
-    #                print("Los campos en ContactosEmp deben estar completamente completados o completamente vacíos.")
-#
-    #            relacion = contacto.get('relacion')
-    #            telefono = contacto.get('telefono')
-#
-#
-    #            # Insertar el contacto en la base de datos
-    #            try:
-    #                con = self.connection()
-    #                cursor= con.cursor()
-    #                sql_insert = """
-    #                INSERT INTO ContactosEmps (nombre, relacion, telefono)
-    #                VALUES (:1, :2, :3)
-    #                """
-    #                cursor.execute(sql_insert, (nombre, relacion, telefono))
-    #                self.con.commit()
-    #                print("Datos insertados correctamente en la tabla ContactosEmp.")
-    #            except cx_Oracle.Error as error:
-    #                print("Error al insertar datos en la tabla ContactosEmp:", error)
-    #            finally:
-    #                cursor.close()
+        #Extraer datos de ContactosEmp
+        contactos = array.get('ContactosEmp', [])
+        if contactos:
+               for contacto in contactos:
+                   nombre = contacto.get('nombre')
+                       # Omitir contacto si el nombre está vacío o es None
+                   if not nombre or nombre.strip() == '':
+                       print("dato vacio")
+                       continue
+                   
+                   # Validar que todos los campos están llenos o vacíos
+                   if all(valor is None or len(str(valor).strip()) == 0 for valor in contacto.values()):
+                       continue  # Contacto completamente vacío, omitir
+                   if any((valor is not None and len(str(valor).strip()) > 0) for valor in contacto.values()) and \
+                      any((valor is None or len(str(valor).strip()) == 0) for valor in contacto.values()):
+                       print("Los campos en ContactosEmp deben estar completamente completados o completamente vacíos.")
+                   relacion = int(contacto.get('relacion'))
+                   telefono = contacto.get('telefono')
+                       # Insertar el contacto en la base de datos
+                   
+                   try:
+                        con=self.connection()
+                        cursor=con.cursor()
+                        cursor.execute("SELECT MAX(id_telefono) FROM telefono")
+                        max_id_tel = cursor.fetchone()[0]
+                        if max_id_tel:
+                            max_id_tel += 1
+            
+                        sql_insert="INSERT INTO telefono (id_telefono,num_telefono) VALUES (:1,:2)"
+                        cursor.execute(sql_insert,(max_id_tel,telefono))
+                        con.commit()
+                   finally:
+                        cursor.close()
+                   try:
+                        con=self.connection()
+                        cursor=con.cursor()
+                        cursor.execute("SELECT MAX(id_contacto) FROM contacto")
+                        max_id_con = cursor.fetchone()[0]
+                        if max_id_con:
+                            max_id_con += 1
+            
+                        sql_insert="INSERT INTO contacto (id_contacto, nombre_contacto, parentesco_id, telefono_id, rut_emp) VALUES (:1,:2,:3,:4,:5)"
+                        cursor.execute(sql_insert,(max_id_con,nombre, relacion, max_id_tel, rut))
+                        con.commit()
+                   finally:
+                        cursor.close()
                     
         cargas = array.get('CargaEmp', [])
         for carga in cargas:
             
-            rut = carga.get('rut')
-            if not rut or rut.strip() == '':
+            rut_fam = carga.get('rut')
+            if not rut_fam or rut_fam.strip() == '':
                 continue
             
             if all(valor is None or len(str(valor).strip()) == 0 for valor in carga.values()):
                 continue
 
             nombre = carga.get('nombre')
-            parentesco = carga.get('parentesco')
+            parentesco = int(carga.get('parentesco'))
 
             # Insertar la carga familiar en la base de datos
             try:
                 con=self.connection()
                 cursor = con.cursor()
                 sql_insert = """
-                INSERT INTO CargaEmpss (rut, nombre, parentesco)
-                VALUES (:1, :2, :3)
+                INSERT INTO carga_familiar (rut_familiar, rut_emp, nombre_familiar, parentesco_id)
+                VALUES (:1, :2, :3, :4)
                 """
-                cursor.execute(sql_insert, (rut, nombre, parentesco))
-                self.con.commit()
+                cursor.execute(sql_insert, (rut_fam, rut, nombre, parentesco))
+                con.commit()
                 print("Datos insertados correctamente en la tabla CargaEmp.")
             except cx_Oracle.Error as error:
                 print("Error al insertar datos en la tabla CargaEmp:", error)
@@ -395,3 +416,55 @@ class bsdinteraction():
                 return False
         finally:
             cur.close()
+
+    def eliminar_carga_familiar(self,nombre_carga, rut_trabajador):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("""
+                DELETE FROM carga_familiar
+                WHERE rut_emp = :rut_emp
+                AND nombre_familiar = :nombre_familiar
+            """, {'rut_emp': rut_trabajador, 'nombre_familiar': nombre_carga})
+            self.conn.commit()
+            print("Carga familiar eliminada correctamente.")
+        except cx_Oracle.Error as error:
+            print("Error al eliminar carga familiar:", error)
+        finally:
+            cur.close()
+            
+    def eliminar_contacto(self,nombre_contacto, rut_trabajador):
+        
+        cur = self.conn.cursor()
+        try:
+            cur.execute("""
+                DELETE FROM contacto
+                WHERE rut_emp = :rut_emp
+                AND nombre_contacto = :nombre_contacto
+            """, {'rut_emp': rut_trabajador, 'nombre_contacto': nombre_contacto})
+            self.conn.commit()
+            print("Contacto eliminado correctamente.")
+        except cx_Oracle.Error as error:
+            print("Error al eliminar contacto:", error)
+        finally:
+            cur.close()
+            
+    def update_employee_data(self,rut, nombre, apellidos):
+        print(rut)
+        cur = self.conn.cursor()
+        try:
+            cur.execute("""
+                UPDATE empleado
+                SET 
+                    nombres = :nombres,
+                    apellidos = :apellidos
+                WHERE rut = :rut
+            """, {'rut': rut,'nombres': nombre, 'apellidos': apellidos})
+            self.conn.commit()
+            print("Datos de empleado actualizados correctamente.")
+            return True
+        except cx_Oracle.Error as error:
+            print("Error al actualizar datos de empleado:", error)
+            return False
+        finally:
+            cur.close()
+            
