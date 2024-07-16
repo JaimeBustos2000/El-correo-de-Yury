@@ -11,18 +11,16 @@ import random
 #CLASE PRINCIPAL PARA INTERACTUAR CON LA BASE DE DATOS/PRELIMINAR PARA SEPARAR LOS REQUERIMIENTOS
 class bsdinteraction():
     def __init__(self):
-        
+        load_dotenv()
         self.conn = None
         self.connection()
 
-
     def connection(self):
-        load_dotenv()
-        self.__hostname = str(os.getenv("Hostname"))
         
+        self.__hostname = str(os.getenv("Hostname"))
         self.__port = int(os.getenv("Port"))
         self.__service_name = str(os.getenv("Service"))
-        self.__username = str(os.getenv("Username"))
+        self.__username = str(os.getenv("db_Username"))
         self.__passw= str(os.getenv("Password"))
         # Construct the DSN (Data Source Name)
         dsn = cx_Oracle.makedsn(self.__hostname, self.__port, service_name=self.__service_name)
@@ -59,31 +57,35 @@ class bsdinteraction():
 
         try:
             # Verificar si el rut está en la tabla trabajadores
-            cursor.execute("SELECT * FROM empleado WHERE rut = :rut", {'rut': rut})
-            trabajadores_result = cursor.fetchone()
+            e_result= cursor.var(cx_Oracle.NUMBER)
+            cursor.callproc("EXISTE_EMP", [rut, e_result])
+            trabajadores_result  = int(e_result.getvalue())
 
             # Verificar si el rut está en la tabla usuarios
-            cursor.execute("SELECT * FROM usuarios WHERE trabajador_rut = :rut", {'rut': rut})
-            usuarios_result = cursor.fetchone()
+            v_result= cursor.var(cx_Oracle.NUMBER)
+            cursor.callproc("USER_EXISTS", [rut, v_result])
+            usuarios_result = int(v_result.getvalue())
 
+            # 1 = Existe, 0 = No existe
             print(trabajadores_result)
             print(usuarios_result)
 
             # Si no se encuentra en trabajadores o en usuarios, retornar False
-            if len(trabajadores_result) == 0 or (trabajadores_result is None and usuarios_result is None):
+            if trabajadores_result==0 or usuarios_result==0:
                 return False
 
             # Si ya existe en usuarios, imprimir mensaje y retornar True
-            if usuarios_result:
+            if usuarios_result==1:
                 print("Rut ya posee usuario")
                 return False
 
             
             # Si no existe en usuarios, crear nuevo usuario
-            nombre=trabajadores_result[1]
-            apellido=trabajadores_result[2]
-            username = str(nombre + apellido[:2]).lower()
-
+            u_result= cursor.var(cx_Oracle.STRING)
+            cursor.callproc("create_username", [rut, u_result])
+            username = u_result.getvalue()
+            print(username)
+            
             while True:
                 cursor.execute("SELECT trabajador_rut FROM usuarios WHERE username = :username", {'username': username})
                 result = cursor.fetchone()

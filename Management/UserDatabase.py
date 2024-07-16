@@ -1,28 +1,28 @@
 import cx_Oracle
-from Management.UserMana import PasswordManager 
+from Management.UserMana import PasswordManager
+import os
 
 class UserDatabase:
     def __init__(self):
-        self.hostname = 'localhost'  # Or the hostname/IP of your Oracle server
-        self.port = 1521             # Default port for Oracle XE
-        self.service_name = 'XE'     # Service name for Oracle XE
-        self.username = 'app_user'   # Oracle username
-        self.passw = '1234567Aa'     # Oracle user password
+        self.hostname = str(os.getenv("Hostname"))
+        self.port = int(os.getenv("Port"))
+        self.service_name = str(os.getenv("Service"))
+        self.username = str(os.getenv("db_Username"))
+        self.passw= str(os.getenv("Password"))
         # Configura la conexión a Oracle
         dsn_tns = cx_Oracle.makedsn(self.hostname, self.port, service_name=self.service_name)
         self.conn = cx_Oracle.connect(self.username ,self.passw, dsn=dsn_tns)
-
         # Inicializa la estructura de la base de datos si no existe
         self.__initialize_database()
 
     def __initialize_database(self):
         # Método privado para crear la tabla si no existe
         cursor = self.conn.cursor()
-
         cursor.close()
 
     def create_user(self, rut,username, password):
         manager = PasswordManager()
+        hashed_username=manager.hash_password(username)
         hashed_password = manager.hash_password(password)
 
         cursor = self.conn.cursor()
@@ -30,7 +30,7 @@ class UserDatabase:
         cursor.execute("SELECT MAX(id) FROM usuarios")
         max_id = cursor.fetchone()[0]
         if max_id is None:
-            max_id = 0
+            max_id = 1
         new_id = max_id + 1
         
         try:
@@ -47,6 +47,8 @@ class UserDatabase:
             cursor.close()
 
     def authenticate_user(self, username, password):
+        print(username)
+        print(password)
         manager = PasswordManager()
         cursor = self.conn.cursor()
         try:
