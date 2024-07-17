@@ -13,6 +13,7 @@ class bsdinteraction():
     def __init__(self):
         load_dotenv()
         self.conn = None
+        self.rol=0
         self.connection()
 
     def connection(self):
@@ -101,26 +102,25 @@ class bsdinteraction():
     def login(self, user, password):
         is_valid=UserDatabase().authenticate_user(user, password)
         print(is_valid)
+        print("Usuario: ",user)
         if is_valid:
+            self.__init__()
+            self.user=user
             return True
         else:
             return False
         
     #Obtiene todos los datos del usuario para el perfil y creacion de usuarios
     def fetch_data(self,name):
-        cur=self.conn.cursor()
-        
+        cur=self.conn.cursor() 
         try:
-            sql = "SELECT trabajador_rut FROM usuarios WHERE usuario = :username"
-            cur.execute(sql, {'username': name})
-            rut=cur.fetchone()
-            trabajador_id=rut[0]
+            rut_empleado=cur.var(cx_Oracle.STRING)
+            cur.callproc("obtener_rut",[rut_empleado,name])
+            trabajador_id=rut_empleado.getvalue()
             print("rut trabajador",trabajador_id)   
         except Exception as e:
             print(f"ERROR BASE DE DATOS: {e}")
             return None
-        
-        
         cur=self.conn.cursor()
 
         try:
@@ -129,6 +129,8 @@ class bsdinteraction():
             cur.callproc("obtener_empleado", [trabajador_id,result])
             
             resultado = result.getvalue()
+            for row in resultado:
+                resultado = row
             print("El array es: ",resultado)
             # Obtener todos los datos resultantes
 
@@ -159,8 +161,8 @@ class bsdinteraction():
             cursor=con.cursor()
             id_direccion = cursor.var(cx_Oracle.NUMBER)
             cursor.callproc("INSERTAR_DIRECCION", [id_direccion,calle,complemento,comuna])
-            direccion_id = id_direccion.getvalue()
-
+            direccion_id = int(id_direccion.getvalue())
+            print("Datos insertados correctamente en la tabla Dirección.",direccion_id)
         finally:
             cursor.close()
         
@@ -169,16 +171,15 @@ class bsdinteraction():
             cursor=con.cursor()
             id_tel=cursor.var(cx_Oracle.NUMBER)
             cursor.callproc("INSERTAR_TELEFONO", [id_tel,telefono])
-            telefono_id = id_tel.getvalue()
+            telefono_id = int(id_tel.getvalue())
+            print("Datos insertados correctamente en la tabla Telefono.",telefono_id)
         finally:
             cursor.close()
-
 
         try:
             con=self.connection()
             cursor = con.cursor()
-            cursor.callproc("INSERTAR_EMPLEADO", [rut, nombres, apellidos, sexo, cargo, direccion_id, telefono_id, fecha, areaDepto])
-            
+            cursor.callproc("INSERTAR_EMPLEADO", [rut, nombres, apellidos, sexo, cargo, direccion_id, telefono_id, areaDepto, fecha])
             
             print("Datos insertados correctamente en la tabla Empleados.")
         except cx_Oracle.Error as error:
@@ -205,58 +206,41 @@ class bsdinteraction():
                        print("Los campos en ContactosEmp deben estar completamente completados o completamente vacíos.")
                    relacion = int(contacto.get('relacion'))
                    telefono = contacto.get('telefono')
-                       # Insertar el contacto en la base de datos
-                   
+   
                    try:
                         con=self.connection()
                         cursor=con.cursor()
-                        cursor.execute("SELECT MAX(id_telefono) FROM telefono")
-                        max_id_tel = cursor.fetchone()[0]
-                        if max_id_tel:
-                            max_id_tel += 1
-            
-                        sql_insert="INSERT INTO telefono (id_telefono,num_telefono) VALUES (:1,:2)"
-                        cursor.execute(sql_insert,(max_id_tel,telefono))
-                        con.commit()
+                        id_tel=cursor.var(cx_Oracle.NUMBER)
+                        cursor.callproc("insertar_telefono", [id_tel,telefono])
+                        tel_contacto = int(id_tel.getvalue())  
                    finally:
                         cursor.close()
+                        
                    try:
                         con=self.connection()
                         cursor=con.cursor()
-                        cursor.execute("SELECT MAX(id_contacto) FROM contacto")
-                        max_id_con = cursor.fetchone()[0]
-                        if max_id_con:
-                            max_id_con += 1
-            
-                        sql_insert="INSERT INTO contacto (id_contacto, nombre_contacto, parentesco_id, telefono_id, rut_emp) VALUES (:1,:2,:3,:4,:5)"
-                        cursor.execute(sql_insert,(max_id_con,nombre, relacion, max_id_tel, rut))
-                        con.commit()
+                        id_contacto=cursor.var(cx_Oracle.NUMBER)
+                        cursor.callproc("INSERTAR_CONTACTO", [id_contacto, nombre, relacion, tel_contacto,rut])
+                        
                    finally:
                         cursor.close()
                     
         cargas = array.get('CargaEmp', [])
-        for carga in cargas:
-            
+
+        for carga in cargas:    
             rut_fam = carga.get('rut')
             if not rut_fam or rut_fam.strip() == '':
                 continue
             
             if all(valor is None or len(str(valor).strip()) == 0 for valor in carga.values()):
-                continue
-
+                continue    
             nombre = carga.get('nombre')
-            parentesco = int(carga.get('parentesco'))
-
+            parentesco = int(carga.get('parentesco'))   
             # Insertar la carga familiar en la base de datos
             try:
                 con=self.connection()
                 cursor = con.cursor()
-                sql_insert = """
-                INSERT INTO carga_familiar (rut_familiar, rut_emp, nombre_familiar, parentesco_id)
-                VALUES (:1, :2, :3, :4)
-                """
-                cursor.execute(sql_insert, (rut_fam, rut, nombre, parentesco))
-                con.commit()
+                cursor.callproc("INSERTAR_CARGA", [rut_fam, rut, nombre, parentesco])
                 print("Datos insertados correctamente en la tabla CargaEmp.")
             except cx_Oracle.Error as error:
                 print("Error al insertar datos en la tabla CargaEmp:", error)
@@ -332,6 +316,24 @@ class bsdinteraction():
             print(f"Error al ejecutar la consulta: {error}")
 
         return mydt
+
+    def obtener_rol(self,user):
+        con=self.connection()
+        cur=con.cursor()
+        
+        role=cur.var(cx_Oracle.STRING)
+        
+        try:
+            
+            print("username: ",user)
+            cur.callproc("obtener_rol",[user,role])
+            self.rol=role.getvalue()
+            print("rol: ",self.rol)
+            return self.rol
+        except Exception as e:
+            print(f"ERROR BASE DE DATOS: {e}")
+            return None
+            
     
     def existe_rut(self,rut):
         cur=self.conn.cursor()

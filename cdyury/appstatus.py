@@ -9,13 +9,13 @@ class AppState:
         self.username = ""
         self.data_array = ""
         self.bsd = bsdinteraction()
+        self.rol = 0
         self.conex=self.bsd.connection()
 
     def set_username(self, username):
         self.username = username
     
     def get_username(self):
-        print(self.username)
         return self.username
 
     def set_data(self, data):
@@ -28,7 +28,11 @@ class AppState:
         self.form = form
         interact = self.bsd
         interact.data_to_db(form)
-        
+    
+    def get_rol(self):
+        bsd=bsdinteraction()
+        self.rol=bsd.obtener_rol(self.get_username())
+        return self.rol
     # Función que obtiene las cargas familiares y contactos de un trabajador en específico y los carga en listas
     def obtener_cargas_contactos(self, rut_trabajador):
         print(rut_trabajador)

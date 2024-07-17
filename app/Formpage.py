@@ -259,7 +259,8 @@ class FormPage:
                 "complemento": self.complemento.value,
                 "comuna": self.comuna.value,
                 "areaDepto": self.areaDepto.value,
-                "telefono": self.telefono.value
+                "telefono": self.telefono.value,
+                "fecha": self.fecha.value
             },
             "ContactosEmp": [
                 {

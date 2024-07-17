@@ -20,7 +20,7 @@ def main(page: ft.Page):
     conex.connection()
     app_state=AppState()
     dashboard_page = DashboardPage(page,app_state)
-    rol=app_state.get_rol()
+    
     # Función que maneja el cambio de rutas
     def route_change(e: RouteChangeEvent) -> None:
         page.views.clear()
@@ -52,6 +52,7 @@ def main(page: ft.Page):
             
         elif page.route == "/inicio":
             dashboard_page.build_dashboard_page()
+            rol=app_state.get_rol()
             page.views.append(
                 ft.View(
                     "/inicio",
