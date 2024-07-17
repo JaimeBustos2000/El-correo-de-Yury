@@ -325,6 +325,30 @@ class bsdinteraction():
         finally:
             cur.close()
 
+
+    def obtener_cargas_contactos(self, rut_trabajador):
+        print(rut_trabajador)
+        
+        cur = self.conn.cursor()
+        try:
+            cur_familiares = cur.var(cx_Oracle.CURSOR)
+            cur.callproc("obtener_carga_familiar", [rut_trabajador, cur_familiares])
+            cargas_familiares = cur_familiares.getvalue().fetchall()
+            
+            cur_contactos= cur.var(cx_Oracle.CURSOR)
+            cur.callproc("obtener_contacto_empleado", [rut_trabajador, cur_contactos])
+            contactos_emergencia = cur_contactos.getvalue().fetchall()
+            
+            print("Cargas familiares:", cargas_familiares)
+            print("Contactos de emergencia:", contactos_emergencia)
+            
+            return cargas_familiares, contactos_emergencia
+        except Exception as e:
+            print(f"Error al obtener cargas y contactos de emergencia: {str(e)}")
+            return [], []
+        finally:
+            cur.close()
+
     def eliminar_carga_familiar(self,nombre_carga, rut_trabajador):
         cur = self.conn.cursor()
         try:

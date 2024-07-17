@@ -53,39 +53,10 @@ class AppState:
     
     # Función que obtiene las cargas familiares y contactos de un trabajador en específico y los carga en listas
     def obtener_cargas_contactos(self, rut_trabajador):
-        print(rut_trabajador)
-        
-        cur = self.conex.cursor()
-        try:
-            cur.execute("""
-                SELECT cf.nombre_familiar, p.relacion
-                FROM carga_familiar cf
-                JOIN parentesco p ON cf.parentesco_id = p.id_parentesco
-                JOIN empleado e ON cf.rut_emp = e.rut
-                WHERE cf.rut_emp = :1
-            """, (rut_trabajador,))
-            cargas_familiares = cur.fetchall()
-            
-            cur.execute("""
-                SELECT 
-                    co.nombre_contacto,
-                    pa.relacion,
-                    t.num_telefono
-                FROM contacto co
-                JOIN telefono t ON co.telefono_id = t.id_telefono
-                JOIN parentesco pa ON co.parentesco_id = pa.id_parentesco
-                WHERE co.rut_emp = :1
-            """, (rut_trabajador,))
-            
-            contactos_emergencia = cur.fetchall()
-            
-            
-            return cargas_familiares, contactos_emergencia
-        except Exception as e:
-            print(f"Error al obtener cargas y contactos de emergencia: {str(e)}")
-            return [], []
-        finally:
-            cur.close()
+        data=self.bsd.obtener_cargas_contactos(rut_trabajador)
+        cargas_familiares = data[0]
+        contactos_emergencia = data[1]
+        return cargas_familiares, contactos_emergencia
     
     
     # Aqui funciones no implementadas para ser tratadas en oracle pero con la logica necesaria para ser implementadas
