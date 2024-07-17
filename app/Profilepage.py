@@ -426,17 +426,17 @@ class ProfilePage:
     def show_data(self):
         data = self.app_state.get_data()
         if data:
-            self.rut.value = data[0][0]
-            self.nombre.value = data[0][1]
-            self.apellido.value = data[0][2]
-            self.genero.value = data[0][3]
-            self.fecha.value = data[0][4]
-            self.cargo.value = data[0][5]
-            self.area.value = data[0][6]
-            self.direccion.value = data[0][7]
-            self.telefono.value = data[0][8]
+            self.rut.value = data[0]
+            self.nombre.value = data[1]
+            self.apellido.value = data[2]
+            self.genero.value = data[3]
+            self.fecha.value = data[4]
+            self.cargo.value = data[5]
+            self.area.value = data[6]
+            self.direccion.value = data[7]
+            self.telefono.value = data[8]
 
-            self.area.value = data[0][6]
+            self.area.value = data[6]
             self.load_cargas_familiares()
             self.load_contactos_emergencia()
             self.page.update()

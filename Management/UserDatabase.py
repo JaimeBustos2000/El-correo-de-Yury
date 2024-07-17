@@ -1,9 +1,11 @@
 import cx_Oracle
 from Management.UserMana import PasswordManager
 import os
+from dotenv import load_dotenv
 
 class UserDatabase:
     def __init__(self):
+        load_dotenv()
         self.hostname = str(os.getenv("Hostname"))
         self.port = int(os.getenv("Port"))
         self.service_name = str(os.getenv("Service"))
@@ -20,25 +22,15 @@ class UserDatabase:
         cursor = self.conn.cursor()
         cursor.close()
 
-    def create_user(self, rut,username, password):
+    def create_user(self,cargo_id, rut,username, password):
         manager = PasswordManager()
-        hashed_username=manager.hash_password(username)
-        hashed_password = manager.hash_password(password)
-
+        hashed_password = manager.hash_credencials(password)
         cursor = self.conn.cursor()
-
-        cursor.execute("SELECT MAX(id) FROM usuarios")
-        max_id = cursor.fetchone()[0]
-        if max_id is None:
-            max_id = 1
-        new_id = max_id + 1
-        
         try:
-            cursor.execute('INSERT INTO usuarios (id, trabajador_rut, username, hashed_password) VALUES (:id , :rut,:username, :hashed_password)',
-                           {'id':new_id,'rut':rut,'username': username, 'hashed_password': hashed_password})
-            self.conn.commit()
-            print("Usuario creado exitosamente")
-        except cx_Oracle.IntegrityError as e:
+            id=cursor.var(cx_Oracle.NUMBER)
+            cursor.callproc('insertar_usuario', [id, cargo_id, rut, username, hashed_password])
+            
+        except cx_Oracle.Error as e:
             if e.args[0].code == 1:
                 print(f"El usuario '{username}' ya existe en la base de datos")
             else:
@@ -47,22 +39,21 @@ class UserDatabase:
             cursor.close()
 
     def authenticate_user(self, username, password):
-        print(username)
-        print(password)
         manager = PasswordManager()
         cursor = self.conn.cursor()
         try:
-            cursor.execute('SELECT hashed_password FROM usuarios WHERE username = :username', {'username': username})
+            cursor.execute('SELECT hash_pass FROM usuarios WHERE usuario = :username', {'username': username})
+            
             result = cursor.fetchone()
-
             if result is None:
+                print("User not found")
                 return False
-
+            
             hashed_password = result[0]
-
-            # Verificar la contraseña utilizando PasswordManager
             is_valid = manager.check_password(password, hashed_password)
-
             return is_valid
+        
+        except cx_Oracle.Error as e:
+            print("Error authenticating user:", e)
         finally:
             cursor.close()

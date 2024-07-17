@@ -16,7 +16,6 @@ class bsdinteraction():
         self.connection()
 
     def connection(self):
-        
         self.__hostname = str(os.getenv("Hostname"))
         self.__port = int(os.getenv("Port"))
         self.__service_name = str(os.getenv("Service"))
@@ -70,46 +69,28 @@ class bsdinteraction():
             print(trabajadores_result)
             print(usuarios_result)
 
-            # Si no se encuentra en trabajadores o en usuarios, retornar False
-            if trabajadores_result==0 or usuarios_result==0:
+            # Si no se encuentra en empleado retornar False
+            if trabajadores_result==0:
                 return False
 
-            # Si ya existe en usuarios, imprimir mensaje y retornar True
-            if usuarios_result==1:
+            # Si ya existe en usuarios, imprimir mensaje y retornar 
+            if trabajadores_result==1 and usuarios_result==1:
                 print("Rut ya posee usuario")
                 return False
 
-            
             # Si no existe en usuarios, crear nuevo usuario
             u_result= cursor.var(cx_Oracle.STRING)
             cursor.callproc("create_username", [rut, u_result])
             username = u_result.getvalue()
             print(username)
             
-            while True:
-                cursor.execute("SELECT trabajador_rut FROM usuarios WHERE username = :username", {'username': username})
-                result = cursor.fetchone()
-
-                if result:
-                    random_usrtag = str(random.randint(1, 99))
-                    username = username + random_usrtag
-                    break
-                else:
-                    break
+            cargo=cursor.var(cx_Oracle.NUMBER)
+            cursor.callproc("get_cargo", [rut, cargo])
+            cargo_id = int(cargo.getvalue())
 
             # Crear hash de la contraseña # Insertar el nuevo usuario en la tabla usuarios
-            UserDatabase().create_user(rut, username, self.__hashpass)
-
-            # Obtener el siguiente ID para el nuevo usuario
-            cursor.execute("SELECT MAX(id) FROM usuarios")
-            max_id = cursor.fetchone()[0]
-            if max_id is None:
-                max_id = 0
-            new_id = max_id + 1
-
+            UserDatabase().create_user(cargo_id,rut, username, self.__hashpass)
             
-
-
             self.conn.commit()
             print("Usuario creado exitosamente")
             return True
@@ -127,15 +108,14 @@ class bsdinteraction():
         
     #Obtiene todos los datos del usuario para el perfil y creacion de usuarios
     def fetch_data(self,name):
-
         cur=self.conn.cursor()
-
+        
         try:
-            sql = "SELECT trabajador_rut FROM usuarios WHERE username = :username"
+            sql = "SELECT trabajador_rut FROM usuarios WHERE usuario = :username"
             cur.execute(sql, {'username': name})
             rut=cur.fetchone()
             trabajador_id=rut[0]
-            print(trabajador_id)   
+            print("rut trabajador",trabajador_id)   
         except Exception as e:
             print(f"ERROR BASE DE DATOS: {e}")
             return None
@@ -145,52 +125,20 @@ class bsdinteraction():
 
         try:
             # Ejecutar consulta SQL para obtener datos del empleado por su ID (trabajador_id)
-            sql = """
-                SELECT
-                    e.rut,
-                    e.nombres,
-                    e.apellidos,
-                    CASE e.sexo
-                        WHEN 'M' THEN 'MASCULINO'
-                        WHEN 'F' THEN 'FEMENINO'
-                        ELSE 'OTRO'
-                    END AS sexo,
-                    TO_CHAR( e.fecha_ing, 'DD-MM-YYYY') AS fecha_formateada,
-                    c.cargo_desc,
-                    d.depto_desc,
-                    dir.calle || ' ' || dir.complemento || ',' || com.nombre_co || ',' || reg.nombre_reg AS Direccion,
-                    t.num_telefono
-                FROM
-                    empleado e
-                JOIN
-                    cargo c ON e.cargo_id = c.id_cargo
-                JOIN
-                    departamento d ON e.departamento_id = d.id_depto
-                JOIN
-                    direccion dir ON e.direccion_id = dir.id_direccion
-                JOIN
-                    comuna com ON dir.comuna_id = com.id_comuna
-                JOIN
-                    region reg ON com.region_id = reg.id_region
-                JOIN
-                    telefono t ON e.telefono_id = t.id_telefono
-                WHERE
-                    e.rut = :rut
-            """
-            cur.execute(sql, {'rut': trabajador_id})
-
+            result = cur.var(cx_Oracle.CURSOR)
+            cur.callproc("obtener_empleado", [trabajador_id,result])
+            
+            resultado = result.getvalue()
+            print("El array es: ",resultado)
             # Obtener todos los datos resultantes
-            datos = cur.fetchall()
-            print(datos)
-            return datos
+
+            return resultado
         finally:
             cur.close()      
         
     #Actualiza los datos del usuario
     def data_to_db(self, array):
         print("data to db:", array)
-        
-        
         data_empleado = array.get('DataEmpleado')
         
         if data_empleado:
@@ -209,36 +157,19 @@ class bsdinteraction():
         try:
             con=self.connection()
             cursor=con.cursor()
+            id_direccion = cursor.var(cx_Oracle.NUMBER)
+            cursor.callproc("INSERTAR_DIRECCION", [id_direccion,calle,complemento,comuna])
+            direccion_id = id_direccion.getvalue()
 
-            cursor.execute("SELECT MAX(id_direccion) FROM direccion")
-            
-            max_id = cursor.fetchone()[0]
-            print(max_id)
-            if max_id:
-                new_id_dir = max_id + 1
-
-
-
-            sql_insert="""
-            INSERT INTO direccion (id_direccion,calle,complemento,comuna_id)
-            VALUES (:1,:2,:3,:4)
-            """
-            cursor.execute(sql_insert,(new_id_dir,calle,complemento,comuna))
-            con.commit()
         finally:
             cursor.close()
         
         try:
             con=self.connection()
             cursor=con.cursor()
-            cursor.execute("SELECT MAX(id_telefono) FROM telefono")
-            max_id_tel = cursor.fetchone()[0]
-            if max_id_tel:
-                max_id_tel += 1
-            
-            sql_insert="INSERT INTO telefono (id_telefono,num_telefono) VALUES (:1,:2)"
-            cursor.execute(sql_insert,(max_id_tel,telefono))
-            con.commit()
+            id_tel=cursor.var(cx_Oracle.NUMBER)
+            cursor.callproc("INSERTAR_TELEFONO", [id_tel,telefono])
+            telefono_id = id_tel.getvalue()
         finally:
             cursor.close()
 
@@ -246,12 +177,9 @@ class bsdinteraction():
         try:
             con=self.connection()
             cursor = con.cursor()
-            sql_insert = """
-            INSERT INTO empleado (rut, nombres, apellidos, sexo, cargo_id, direccion_id, telefono_id, departamento_id, fecha_ing)
-            VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9)
-            """
-            cursor.execute(sql_insert, (rut, nombres, apellidos, sexo, cargo, new_id_dir, max_id_tel, areaDepto, fecha))
-            con.commit()
+            cursor.callproc("INSERTAR_EMPLEADO", [rut, nombres, apellidos, sexo, cargo, direccion_id, telefono_id, fecha, areaDepto])
+            
+            
             print("Datos insertados correctamente en la tabla Empleados.")
         except cx_Oracle.Error as error:
             print("Error al insertar datos en la tabla Empleados:", error)
@@ -408,14 +336,14 @@ class bsdinteraction():
     def existe_rut(self,rut):
         cur=self.conn.cursor()
         try:
-            sql = "SELECT * FROM empleado WHERE rut = :rut"
-            cur.execute(sql, {'rut': rut})
-            trabajadores = cur.fetchall()
-            print(trabajadores)
-            if trabajadores:
+            result=cur.var(cx_Oracle.NUMBER)
+            cur.callproc("EXISTE_EMP", [rut, result])
+            if int(result.getvalue())==1:
                 return True
             else:
                 return False
+        except cx_Oracle.Error as error:
+            print(f"Error al ejecutar la consulta: {error}")
         finally:
             cur.close()
 

@@ -10,6 +10,7 @@ class DashboardPage:
     def __init__(self, page:Page,app_state):
         self.page = page
         self.app_state = app_state
+        self.role = app_state.get_rol()
         
         self.listaEmp = ElevatedButton(text="Lista de empleados", on_click=lambda _: page.go("/tables"))
         self.start = ElevatedButton(text="Inicio", bgcolor="GREEN", color="BLACK", on_click=lambda _: page.go("/inicio"))
