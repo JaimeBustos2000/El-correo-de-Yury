@@ -115,7 +115,7 @@ class bsdinteraction():
         cur=self.conn.cursor() 
         try:
             rut_empleado=cur.var(cx_Oracle.STRING)
-            cur.callproc("obtener_rut",[rut_empleado,name])
+            cur.callproc("obtener_rut",[name,rut_empleado])
             trabajador_id=rut_empleado.getvalue()
             print("rut trabajador",trabajador_id)   
         except Exception as e:
@@ -247,11 +247,7 @@ class bsdinteraction():
             finally:
                 cursor.close()
    
-    #Obtiene los datos de los trabajadores para mostrar en la tabla
     def consultar_trabajadores(self, filtro):
-        if filtro=="":
-            filtro = "1=1"
-        
         mydt = ft.DataTable(
             bgcolor="WHITE",
             heading_row_color=ft.colors.BLACK87,
@@ -260,46 +256,27 @@ class bsdinteraction():
             vertical_lines=ft.border.BorderSide(1, "BLACK"),
             horizontal_lines=ft.border.BorderSide(2, ""),
             columns=[
-                ft.DataColumn(ft.Text(value="#",color="WHITE")),
-                ft.DataColumn(ft.Text(value="Rut",color="WHITE")),
-                ft.DataColumn(ft.Text(value="Nombre",color="WHITE")),
-                ft.DataColumn(ft.Text(value="Sexo",color="WHITE")),
-                ft.DataColumn(ft.Text(value="Cargo",color="WHITE")),
-                ft.DataColumn(ft.Text(value="Fecha-ingreso",color="WHITE")),
-                ft.DataColumn(ft.Text(value="Area y depto.",color="WHITE"))
+                ft.DataColumn(ft.Text(value="#", color="WHITE")),
+                ft.DataColumn(ft.Text(value="Rut", color="WHITE")),
+                ft.DataColumn(ft.Text(value="Nombre", color="WHITE")),
+                ft.DataColumn(ft.Text(value="Sexo", color="WHITE")),
+                ft.DataColumn(ft.Text(value="Cargo", color="WHITE")),
+                ft.DataColumn(ft.Text(value="Fecha-ingreso", color="WHITE")),
+                ft.DataColumn(ft.Text(value="Area y depto.", color="WHITE"))
             ],
             rows=[]
         )
 
         try:
-            cur=self.conn.cursor()
-                # Consulta SQL para obtener trabajadores con filtro
-            query = f"""
-                    SELECT e.rut, 
-                        e.nombres ||' '|| e.apellidos AS nombre_completo,
-                    CASE e.sexo
-                        WHEN 'M' THEN 'MASCULINO'
-                        WHEN 'F' THEN 'FEMENINO'
-                        ELSE 'OTRO'
-                    END AS sexo,
-                        e.direccion_id, 
-                        t.num_telefono, 
-                        c.cargo_desc,
-                    TO_CHAR(e.fecha_ing, 'YYYY-MM-DD') AS fecha_ingreso,
-                     d.depto_desc AS area_y_departamento
-                    FROM empleado e
-                    JOIN telefono t ON e.telefono_id = t.id_telefono
-                    JOIN cargo c ON e.cargo_id = c.id_cargo
-                    JOIN direccion di ON di.id_direccion = e.direccion_id
-                    JOIN departamento d ON e.departamento_id = d.id_depto
-                    WHERE {filtro}
-                """
-            print(query)
-            cur.execute(query)
-            
-            consulta=cur.fetchall()
-                # Procesar los resultados
-            for i, row in enumerate(consulta,1):
+            cur = self.conn.cursor()
+
+            # Llamar al procedimiento almacenado
+            output_cursor = cur.var(cx_Oracle.CURSOR)
+            cur.callproc('consultar_trabajadores', [filtro, output_cursor])
+
+            # Fetch the results from the cursor
+            result_cursor = output_cursor.getvalue()
+            for i, row in enumerate(result_cursor, 1):
                 mydt.rows.append(
                     ft.DataRow(cells=[
                         ft.DataCell(ft.Text(str(i), color="BLACK")),
@@ -320,21 +297,20 @@ class bsdinteraction():
     def obtener_rol(self,user):
         con=self.connection()
         cur=con.cursor()
-        
+
         role=cur.var(cx_Oracle.STRING)
         
         try:
-            
-            print("username: ",user)
+            print("username para rol: ",user)
             cur.callproc("obtener_rol",[user,role])
             self.rol=role.getvalue()
-            print("rol: ",self.rol)
+            print("rol del usuario: ",self.rol)
             return self.rol
+        
         except Exception as e:
             print(f"ERROR BASE DE DATOS: {e}")
             return None
             
-    
     def existe_rut(self,rut):
         cur=self.conn.cursor()
         try:
@@ -358,7 +334,6 @@ class bsdinteraction():
                 AND nombre_familiar = :nombre_familiar
             """, {'rut_emp': rut_trabajador, 'nombre_familiar': nombre_carga})
             self.conn.commit()
-            print("Carga familiar eliminada correctamente.")
         except cx_Oracle.Error as error:
             print("Error al eliminar carga familiar:", error)
         finally:
@@ -374,7 +349,6 @@ class bsdinteraction():
                 AND nombre_contacto = :nombre_contacto
             """, {'rut_emp': rut_trabajador, 'nombre_contacto': nombre_contacto})
             self.conn.commit()
-            print("Contacto eliminado correctamente.")
         except cx_Oracle.Error as error:
             print("Error al eliminar contacto:", error)
         finally:
@@ -392,7 +366,6 @@ class bsdinteraction():
                 WHERE rut = :rut
             """, {'rut': rut,'nombres': nombre, 'apellidos': apellidos})
             self.conn.commit()
-            print("Datos de empleado actualizados correctamente.")
             return True
         except cx_Oracle.Error as error:
             print("Error al actualizar datos de empleado:", error)

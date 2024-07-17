@@ -8,8 +8,9 @@ class AppState:
     def __init__(self):
         self.username = ""
         self.data_array = ""
-        self.bsd = bsdinteraction()
         self.rol = 0
+        self.bsd = bsdinteraction()
+        self.filters=False
         self.conex=self.bsd.connection()
 
     def set_username(self, username):
@@ -30,9 +31,26 @@ class AppState:
         interact.data_to_db(form)
     
     def get_rol(self):
-        bsd=bsdinteraction()
-        self.rol=bsd.obtener_rol(self.get_username())
+        self.rol = self.bsd.obtener_rol(self.get_username())
         return self.rol
+    
+    def set_rol(self, rol):
+        self.rol = rol
+    
+    def retornar_rol(self):
+        nombre_usuario=self.get_username()
+        print("Nombre de usuario: ",nombre_usuario)
+        self.rol = self.bsd.obtener_rol(nombre_usuario)
+        print(self.rol)
+        return self.rol
+    
+    def set_filters(self, filters):
+        self.filters = filters
+        
+    def get_filters_on(self):
+        print("filtro en appstate", self.filters)
+        return self.filters
+    
     # Función que obtiene las cargas familiares y contactos de un trabajador en específico y los carga en listas
     def obtener_cargas_contactos(self, rut_trabajador):
         print(rut_trabajador)
@@ -61,7 +79,7 @@ class AppState:
             
             contactos_emergencia = cur.fetchall()
             
-            print(cargas_familiares, contactos_emergencia)
+            
             return cargas_familiares, contactos_emergencia
         except Exception as e:
             print(f"Error al obtener cargas y contactos de emergencia: {str(e)}")

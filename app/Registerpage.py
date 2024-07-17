@@ -1,7 +1,6 @@
 import flet as ft
 from flet import *
 from cdyury.bsdclass import bsdinteraction
-from cdyury.appstatus import AppState
 from datetime import datetime
 import time
 

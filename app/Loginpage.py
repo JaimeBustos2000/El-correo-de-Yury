@@ -1,7 +1,7 @@
 import flet as ft
 from flet import *
 from cdyury.bsdclass import bsdinteraction
-from cdyury.appstatus import AppState
+
 
 class LoginPage:
     def __init__(self, page:Page,app_state):
@@ -60,6 +60,9 @@ class LoginPage:
         validacion = conexion.login(user, password)
         if validacion:
             self.state.set_username(user)
+            rol = self.state.get_rol()  # Obtener el rol directamente
+            self.state.set_rol(rol)
+            print("ROL EN LOGIN", rol)
             self.page.go("/inicio")
         else:
             self.show_error_dialog("Usuario o contraseña incorrectos, ingrese nuevamente")
@@ -73,6 +76,7 @@ class LoginPage:
     def get_password(self):
         return self.text_pass.value
 
+    
     def show_error_dialog(self, message):
         dialog = AlertDialog(title=Text(message))
         self.page.dialog = dialog

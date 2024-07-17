@@ -16,10 +16,10 @@ def main(page: ft.Page):
     page.vertical_alignment = MainAxisAlignment.START
     page.window_maximized = True
 
-    conex=bsdinteraction()
+    conex = bsdinteraction()
     conex.connection()
-    app_state=AppState()
-    dashboard_page = DashboardPage(page,app_state)
+    app_state = AppState()
+    dashboard_page = DashboardPage(page, app_state)
     
     # Función que maneja el cambio de rutas
     def route_change(e: RouteChangeEvent) -> None:
@@ -52,12 +52,11 @@ def main(page: ft.Page):
             
         elif page.route == "/inicio":
             dashboard_page.build_dashboard_page()
-            rol=app_state.get_rol()
             page.views.append(
                 ft.View(
                     "/inicio",
                     bgcolor="#3e4e84",
-                    controls=[dashboard_page.inicio,dashboard_page.navbar],
+                    controls=[dashboard_page.inicio, dashboard_page.navbar],
                     vertical_alignment=MainAxisAlignment.CENTER,
                     horizontal_alignment=CrossAxisAlignment.CENTER,
                     spacing=10
@@ -65,21 +64,21 @@ def main(page: ft.Page):
             )
             
         elif page.route == "/cuenta":
-            profile =ProfilePage(page,app_state)
+            profile = ProfilePage(page, app_state)
             profile.show_data()
             dashboard_page.build_account_page()
             page.views.append(
                 ft.View(
                     "/cuenta",
                     bgcolor="#3e4e84",
-                    controls=[dashboard_page.navbar,profile.get_card()],
+                    controls=[dashboard_page.navbar, profile.get_card()],
                     vertical_alignment=MainAxisAlignment.CENTER,
                     horizontal_alignment=CrossAxisAlignment.CENTER,
                     spacing=10
                 )
             )
         elif page.route == "/tables":
-            mydt = Tables(page)
+            mydt = Tables(page,app_state)
             table = mydt.datatable()
             filter_ui = mydt.table()
             dashboard_page.build_lista_emp()
@@ -94,17 +93,15 @@ def main(page: ft.Page):
                 )
             )
             
-            
         elif page.route == "/formularios":
             dashboard_page.build_forms()
-            form=FormPage(page,app_state)
-            
+            form = FormPage(page, app_state)
             page.views.append(
                 ft.View(
                     "/formularios",
                     bgcolor="#3e4e84",
                     scroll=True,
-                    controls=[dashboard_page.navbar,form.get_card()],
+                    controls=[dashboard_page.navbar, form.get_card()],
                     vertical_alignment=MainAxisAlignment.CENTER,
                     horizontal_alignment=CrossAxisAlignment.CENTER,
                     spacing=10,
