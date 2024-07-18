@@ -70,8 +70,8 @@ class AppState:
         interact.eliminar_contacto(nombre_contacto, rut_trabajador)
     
     # Función que obtiene los datos de un trabajador en específico y los actualiza
-    def update_employee_data(self, rut, nombre, apellido):
-        update=self.bsd.update_employee_data(rut,nombre, apellido)
+    def update_employee_data(self, rut, nombre, apellido, genero,telefono):
+        update=self.bsd.update_employee_data(rut,nombre, apellido,genero,telefono)
         return update
 
     # Función que obtiene las cargas familiares nuevas de un trabajador en específico y los añade

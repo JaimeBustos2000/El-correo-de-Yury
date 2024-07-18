@@ -26,7 +26,7 @@ class ProfilePage:
         self.rut = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Rut",label_style=TextStyle(color="WHITE"))
         self.genero = TextField(value="", color="WHITE", height=40, read_only=True, bgcolor="BLACK", label="Genero",label_style=TextStyle(color="WHITE"))
 
-        self.select_genero = Dropdown(value = self.genero.value,options=[
+        self.select_genero = Dropdown(value = self.genero.value,label=self.genero.value,options=[
             dropdown.Option("F"),
             dropdown.Option("M"),
         ],
@@ -349,15 +349,16 @@ class ProfilePage:
         if not self.hay_cambios():
             self.show_error_dialog("No se han realizado cambios.")
             return
-
-        genero_actual = self.select_genero.value if self.select_genero.visible else self.genero.value
+        
         nombre_actual = self.nombre.value
-        direccion_actual = self.direccion.value
-        telefono_actual = self.telefono.value
+        apellido = self.apellido.value
         trabajador_rut = self.rut.value  # Rut del trabajador que ha iniciado sesión
 
+        gnero_actual = self.select_genero.value
+        telefono_actual = self.telefono.value
+        
         # Actualizar datos principales del empleado en la base de datos
-        if self.app_state.update_employee_data(trabajador_rut, genero_actual, nombre_actual, direccion_actual, telefono_actual):
+        if self.app_state.update_employee_data(trabajador_rut, nombre_actual, apellido, gnero_actual, telefono_actual):
             # Obtener datos de cargas familiares y contactos de emergencia
             cargas = self.obtener_cargas_familiares()
             contactos = self.obtener_contactos_emergencia()

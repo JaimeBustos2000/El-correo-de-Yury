@@ -338,10 +338,7 @@ class bsdinteraction():
             cur_contactos= cur.var(cx_Oracle.CURSOR)
             cur.callproc("obtener_contacto_empleado", [rut_trabajador, cur_contactos])
             contactos_emergencia = cur_contactos.getvalue().fetchall()
-            
-            print("Cargas familiares:", cargas_familiares)
-            print("Contactos de emergencia:", contactos_emergencia)
-            
+                      
             return cargas_familiares, contactos_emergencia
         except Exception as e:
             print(f"Error al obtener cargas y contactos de emergencia: {str(e)}")
@@ -349,47 +346,42 @@ class bsdinteraction():
         finally:
             cur.close()
 
-    def eliminar_carga_familiar(self,nombre_carga, rut_trabajador):
-        cur = self.conn.cursor()
-        try:
-            cur.execute("""
-                DELETE FROM carga_familiar
-                WHERE rut_emp = :rut_emp
-                AND nombre_familiar = :nombre_familiar
-            """, {'rut_emp': rut_trabajador, 'nombre_familiar': nombre_carga})
-            self.conn.commit()
-        except cx_Oracle.Error as error:
-            print("Error al eliminar carga familiar:", error)
-        finally:
-            cur.close()
+    #def eliminar_carga_familiar(self,nombre_carga, rut_trabajador):
+    #    cur = self.conn.cursor()
+    #    try:
+    #        cur.execute("""
+    #            DELETE FROM carga_familiar
+    #            WHERE rut_emp = :rut_emp
+    #            AND nombre_familiar = :nombre_familiar
+    #        """, {'rut_emp': rut_trabajador, 'nombre_familiar': nombre_carga})
+    #        self.conn.commit()
+    #    except cx_Oracle.Error as error:
+    #        print("Error al eliminar carga familiar:", error)
+    #    finally:
+    #        cur.close()
             
-    def eliminar_contacto(self,nombre_contacto, rut_trabajador):
-        
-        cur = self.conn.cursor()
-        try:
-            cur.execute("""
-                DELETE FROM contacto
-                WHERE rut_emp = :rut_emp
-                AND nombre_contacto = :nombre_contacto
-            """, {'rut_emp': rut_trabajador, 'nombre_contacto': nombre_contacto})
-            self.conn.commit()
-        except cx_Oracle.Error as error:
-            print("Error al eliminar contacto:", error)
-        finally:
-            cur.close()
+    #def eliminar_contacto(self,nombre_contacto, rut_trabajador):
+    #    
+    #    cur = self.conn.cursor()
+    #    try:
+    #        cur.execute("""
+    #            DELETE FROM contacto
+    #            WHERE rut_emp = :rut_emp
+    #            AND nombre_contacto = :nombre_contacto
+    #        """, {'rut_emp': rut_trabajador, 'nombre_contacto': nombre_contacto})
+    #        self.conn.commit()
+    #    except cx_Oracle.Error as error:
+    #        print("Error al eliminar contacto:", error)
+    #    finally:
+    #        cur.close()
             
-    def update_employee_data(self,rut, nombre, apellidos):
+    def update_employee_data(self,rut, nombre, apellidos, genero,telefono):
         print(rut)
+        print("nombre",nombre)
+        print("apellidos",apellidos)
         cur = self.conn.cursor()
         try:
-            cur.execute("""
-                UPDATE empleado
-                SET 
-                    nombres = :nombres,
-                    apellidos = :apellidos
-                WHERE rut = :rut
-            """, {'rut': rut,'nombres': nombre, 'apellidos': apellidos})
-            self.conn.commit()
+            cur.callproc("actualizar_empleado", [rut, nombre, apellidos,genero,telefono])
             return True
         except cx_Oracle.Error as error:
             print("Error al actualizar datos de empleado:", error)
